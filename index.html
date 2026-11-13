@@ -1,0 +1,3534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="栖薇 · Seraphine" />
+  <title>Seraphine · 栖薇的琉璃玫瑰圣堂档案夹</title>
+  <meta name="description" content="Seraphine · 栖薇的圣咏残章：纯代码生成的金丝琉璃玫瑰与哥特花窗磨砂档案夹，支持晨曦欧泊与午夜圣血双色切换、丁达尔微光散景、荆棘物理摇曳与花瓣风暴。" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    :root {
+      --ink-glow: rgba(255, 224, 186, 0.28);
+      --sub-color: rgba(242, 232, 240, 0.74);
+      --sub-drop-color: rgba(255, 232, 192, 0.96);
+      --sub-drop-glow: rgba(255, 204, 140, 0.58);
+      --card-bg-1: rgba(208, 188, 236, 0.34);
+      --card-bg-2: rgba(154, 152, 214, 0.26);
+      --card-bg-3: rgba(96, 78, 128, 0.34);
+      --card-border: rgba(255, 232, 204, 0.42);
+      --card-hover-1: rgba(236, 206, 248, 0.50);
+      --card-hover-2: rgba(178, 182, 242, 0.42);
+      --card-hover-3: rgba(128, 98, 168, 0.46);
+      --card-hover-border: rgba(255, 240, 212, 0.85);
+      --card-hover-glow: rgba(255, 210, 168, 0.30);
+    }
+
+    body.theme-crimson {
+      --ink-glow: rgba(255, 196, 136, 0.32);
+      --sub-color: rgba(240, 218, 224, 0.76);
+      --sub-drop-color: rgba(255, 218, 166, 0.98);
+      --sub-drop-glow: rgba(235, 130, 150, 0.62);
+      --card-bg-1: rgba(168, 52, 92, 0.36);
+      --card-bg-2: rgba(98, 46, 124, 0.30);
+      --card-bg-3: rgba(48, 28, 68, 0.42);
+      --card-border: rgba(238, 196, 138, 0.46);
+      --card-hover-1: rgba(206, 68, 112, 0.54);
+      --card-hover-2: rgba(126, 58, 158, 0.46);
+      --card-hover-3: rgba(68, 34, 96, 0.52);
+      --card-hover-border: rgba(255, 222, 162, 0.90);
+      --card-hover-glow: rgba(228, 96, 136, 0.36);
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100dvh;
+      min-height: 620px;
+      background: #000000;
+      color: rgba(250, 244, 248, 0.94);
+      overflow: hidden;
+      overscroll-behavior: none;
+      touch-action: none;
+      font-family: "Cormorant Garamond", "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    @media (hover: hover) and (pointer: fine) {
+      html, body, button, .card-item {
+        cursor: none !important;
+      }
+    }
+
+    #stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      min-height: 620px;
+      background: #000000;
+      overflow: hidden;
+    }
+
+    canvas#scene {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 1;
+    }
+
+    /* 3D Perspective Overlay locked to the Folder Front Cover */
+    #folder-3d-anchor {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      pointer-events: none;
+      z-index: 3;
+      perspective: 900px;
+      -webkit-perspective: 900px;
+    }
+
+    #cover-face-ui {
+      position: absolute;
+      inset: 0;
+      transform-origin: 50% 100%;
+      -webkit-transform-origin: 50% 100%;
+      will-change: transform, opacity;
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 20px 26px 19px 25px;
+    }
+
+    .cover-bottom-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      width: 100%;
+      gap: 12px;
+    }
+
+    .title-group {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+
+    #title-wrap {
+      position: relative;
+      height: 60px;
+      display: flex;
+      align-items: flex-end;
+      filter: drop-shadow(0 2px 12px var(--ink-glow));
+      transition: opacity 0.25s ease;
+    }
+
+    .font-v1 #svg-calligraphy { display: block; }
+    .font-v1 #text-calligraphy { display: none; }
+
+    .font-v2 #svg-calligraphy,
+    .font-v3 #svg-calligraphy,
+    .font-v4 #svg-calligraphy { display: none; }
+
+    #text-calligraphy {
+      display: none;
+      color: rgba(252, 247, 244, 0.95);
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .font-v2 #text-calligraphy {
+      display: block;
+      font-family: "Snell Roundhand", "Apple Chancery", "Zapfino", "URW Chancery L", "Georgia", cursive, serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: 39px;
+      letter-spacing: 0.03em;
+    }
+
+    .font-v3 #text-calligraphy {
+      display: block;
+      font-family: "Didot", "Bodoni MT", "Cormorant Garamond", "Baskerville", "Times New Roman", serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 37px;
+      letter-spacing: 0.07em;
+    }
+
+    .font-v4 #text-calligraphy {
+      display: block;
+      font-family: "Optima", "Avenir Next", "Helvetica Neue", sans-serif;
+      font-weight: 200;
+      font-size: 27px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      padding-bottom: 4px;
+    }
+
+    .subtitle-box {
+      position: relative;
+      height: 19px;
+      min-width: 220px;
+    }
+
+    .subtitle-line {
+      position: absolute;
+      left: 4px;
+      top: 0;
+      font-family: "Songti SC", "STSong", "SimSun", "Noto Serif SC", serif;
+      font-size: 12px;
+      letter-spacing: 0.26em;
+      color: var(--sub-color);
+      white-space: nowrap;
+      transition: opacity 0.28s ease, transform 0.28s ease, color 0.28s ease;
+    }
+
+    #subtitle-drop {
+      opacity: 0;
+      transform: translateY(5px);
+      color: var(--sub-drop-color);
+      text-shadow: 0 0 12px var(--sub-drop-glow);
+    }
+
+    body.dragging-near #subtitle-normal {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+
+    body.dragging-near #subtitle-drop {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Image 3's Gothic Cathedral Rose Window Arch with Embedded Rose! */
+    .seal-icon {
+      width: 28px;
+      height: 40px;
+      opacity: 0.88;
+      flex-shrink: 0;
+      filter: drop-shadow(0 0 7px rgba(255, 224, 190, 0.28));
+    }
+
+    /* Specimen / Scripture Card Fan Layer */
+    #card-fan-layer {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 0;
+      height: 0;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    #card-fan-layer.open {
+      pointer-events: auto;
+    }
+
+    .card-item {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 82px;
+      height: 122px;
+      margin-left: -41px;
+      margin-top: -61px;
+      border-radius: 11px;
+      background: linear-gradient(
+        160deg,
+        var(--card-bg-1) 0%,
+        var(--card-bg-2) 52%,
+        var(--card-bg-3) 100%
+      );
+      backdrop-filter: blur(13px) saturate(1.25);
+      -webkit-backdrop-filter: blur(13px) saturate(1.25);
+      border: 1px solid var(--card-border);
+      box-shadow:
+        0 10px 28px rgba(10, 4, 18, 0.62),
+        inset 0 1px 0 rgba(255, 245, 228, 0.42);
+      transform-origin: 50% 50%;
+      opacity: 0;
+      pointer-events: none;
+      transition:
+        transform 0.46s cubic-bezier(0.2, 0.88, 0.26, 1),
+        opacity 0.30s ease,
+        background 0.26s ease,
+        border-color 0.26s ease,
+        box-shadow 0.26s ease;
+      padding: 9px 9px 10px 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    #card-fan-layer.open .card-item {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .card-item.active,
+    .card-item:hover {
+      background: linear-gradient(
+        160deg,
+        var(--card-hover-1) 0%,
+        var(--card-hover-2) 52%,
+        var(--card-hover-3) 100%
+      );
+      border-color: var(--card-hover-border);
+      box-shadow:
+        0 16px 36px rgba(18, 6, 28, 0.76),
+        0 0 22px var(--card-hover-glow),
+        inset 0 1px 0 rgba(255, 250, 238, 0.72);
+      z-index: 35 !important;
+    }
+
+    .card-item.deleting {
+      opacity: 0 !important;
+      transform: translateY(-46px) scale(0.76) !important;
+      pointer-events: none !important;
+      transition: transform 0.32s ease, opacity 0.28s ease !important;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 18px;
+    }
+
+    .card-mini-mark {
+      width: 11px;
+      height: 15px;
+      opacity: 0.72;
+    }
+
+    .card-del-btn {
+      appearance: none;
+      border: 1px solid rgba(255, 232, 198, 0.38);
+      background: rgba(28, 14, 34, 0.62);
+      color: rgba(255, 246, 238, 0.96);
+      font-family: "PingFang SC", "Songti SC", sans-serif;
+      font-size: 10px;
+      line-height: 1;
+      padding: 3px 6.5px;
+      border-radius: 999px;
+      opacity: 0;
+      transform: scale(0.86);
+      pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.18s ease, background 0.18s ease;
+    }
+
+    .card-item.active .card-del-btn,
+    .card-item:hover .card-del-btn {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+
+    .card-del-btn:hover,
+    .card-del-btn:active {
+      background: rgba(196, 56, 98, 0.78);
+      border-color: rgba(255, 222, 196, 0.85);
+    }
+
+    .card-ext {
+      font-family: "Cormorant Garamond", "Baskerville", Georgia, serif;
+      font-style: italic;
+      font-size: 18px;
+      letter-spacing: 0.03em;
+      color: rgba(255, 248, 242, 0.95);
+      margin-top: -2px;
+    }
+
+    .card-name {
+      font-family: "Songti SC", "STSong", "Noto Serif SC", serif;
+      font-size: 10.5px;
+      letter-spacing: 0.06em;
+      color: rgba(248, 238, 244, 0.88);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      position: relative;
+      z-index: 2;
+    }
+
+    .card-watermark {
+      position: absolute;
+      right: -2px;
+      bottom: 7px;
+      width: 24px;
+      height: 34px;
+      opacity: 0.17;
+      pointer-events: none;
+    }
+
+    /* Top-Right Whisper Controls */
+    #top-bar {
+      position: fixed;
+      top: max(14px, env(safe-area-inset-top, 14px));
+      right: max(14px, env(safe-area-inset-right, 14px));
+      z-index: 10;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 5px;
+      opacity: 0.38;
+      transition: opacity 0.3s ease;
+    }
+
+    #top-bar:hover,
+    #top-bar:focus-within {
+      opacity: 0.96;
+    }
+
+    body.zen-mode #top-bar,
+    body.zen-mode #hint-whisper {
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+
+    .pill-ctrl {
+      appearance: none;
+      background: rgba(24, 16, 32, 0.62);
+      border: 1px solid rgba(242, 214, 184, 0.26);
+      color: rgba(246, 236, 242, 0.86);
+      font-family: "Songti SC", "PingFang SC", serif;
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      padding: 4px 8.5px;
+      border-radius: 999px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: border-color 0.22s ease, color 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .pill-ctrl.active,
+    .pill-ctrl:hover {
+      border-color: rgba(255, 224, 178, 0.78);
+      color: #ffffff;
+      background: rgba(76, 48, 92, 0.68);
+      box-shadow: 0 0 10px rgba(255, 212, 164, 0.18);
+    }
+
+    body.theme-crimson .pill-ctrl.active {
+      border-color: rgba(246, 198, 128, 0.85);
+      background: rgba(116, 28, 62, 0.72);
+      box-shadow: 0 0 12px rgba(218, 72, 114, 0.28);
+    }
+
+    .ctrl-sep {
+      width: 1px;
+      height: 12px;
+      background: rgba(255, 228, 196, 0.22);
+      margin: 0 2px;
+    }
+
+    #hint-whisper {
+      position: fixed;
+      bottom: max(14px, env(safe-area-inset-bottom, 14px));
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 8;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      color: rgba(232, 214, 228, 0.28);
+      white-space: nowrap;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+
+    @media (max-width: 560px) {
+      #cover-face-ui {
+        padding: 14px 18px 13px 16px;
+      }
+      #title-wrap {
+        height: 48px;
+      }
+      #svg-calligraphy {
+        width: 184px;
+        height: 48px;
+      }
+      .font-v2 #text-calligraphy { font-size: 31px; }
+      .font-v3 #text-calligraphy { font-size: 29px; }
+      .font-v4 #text-calligraphy { font-size: 21px; }
+      .subtitle-line {
+        font-size: 10.5px;
+        letter-spacing: 0.18em;
+      }
+      .seal-icon {
+        width: 23px;
+        height: 33px;
+      }
+      .card-item {
+        width: 62px;
+        height: 96px;
+        margin-left: -31px;
+        margin-top: -48px;
+        padding: 6px 6px 7px 7px;
+        border-radius: 9px;
+      }
+      .card-ext {
+        font-size: 15px;
+      }
+      .card-name {
+        font-size: 9.5px;
+      }
+      #top-bar {
+        opacity: 0.52;
+        gap: 4px;
+      }
+      .pill-ctrl {
+        font-size: 10.5px;
+        padding: 3.5px 7.5px;
+      }
+      #hint-whisper {
+        font-size: 10px;
+        letter-spacing: 0.13em;
+      }
+    }
+  </style>
+</head>
+<body class="font-v1 theme-opaline">
+  <main id="stage">
+    <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Seraphine · 栖薇的琉璃玫瑰圣堂档案夹</h1>
+
+    <canvas id="scene"></canvas>
+
+    <!-- 3D Perspective-Locked Folder Front Cover Typography & Gothic Rose Window Emblem -->
+    <div id="folder-3d-anchor">
+      <div id="cover-face-ui">
+        <div class="cover-bottom-row">
+          <div class="title-group">
+            <div id="title-wrap">
+              <!-- Variant 1: Bespoke Sweeping Spencerian Script "Seraphine" (homage to Image 3's dramatic S & tail!) -->
+              <svg id="svg-calligraphy" width="228" height="58" viewBox="0 0 278 68" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Seraphine">
+                <defs>
+                  <linearGradient id="roseInkGrad" x1="4" y1="10" x2="270" y2="28" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="#FFF5EA" stop-opacity="0.92" />
+                    <stop offset="48%" stop-color="#FFFFFF" stop-opacity="0.99" />
+                    <stop offset="100%" stop-color="#F7E4F5" stop-opacity="0.93" />
+                  </linearGradient>
+                </defs>
+                <!-- Sweeping Spencerian Capital "S" with Image 3's signature wide left flourish! -->
+                <path d="M6 42 C 1 28, 22 15, 48 16 C 63 16, 74 10, 68 8 C 61 6, 48 16, 49 28 C 50 40, 60 47, 45 55 C 31 62, 16 59, 20 50 C 24 42, 41 42, 58 46"
+                      stroke="url(#roseInkGrad)" stroke-width="1.95" stroke-linecap="round" stroke-linejoin="round" />
+                <!-- Flowing "e" -> "r" -> "a" -->
+                <path d="M62 45 C 69 44, 76 38, 74 34 C 71 31, 64 35, 64 43 C 64 49, 72 50, 79 44 C 83 40, 84 35, 83 34 C 82 34, 87 35, 91 34 C 93 34, 90 42, 92 47 C 94 50, 100 48, 105 43"
+                      stroke="url(#roseInkGrad)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
+                <!-- "a" oval -> graceful looped "p" -> tall cathedral "h" -->
+                <path d="M120 37 C 115 33, 106 35, 104 42 C 102 48, 107 50, 113 48 C 118 46, 121 38, 121 35 C 120 42, 119 48, 124 49 C 129 50, 134 42, 136 35 C 134 45, 130 58, 127 63 C 125 66, 131 65, 134 56 C 136 47, 138 35, 145 35 C 150 35, 149 45, 144 48 C 149 48, 157 34, 163 17 C 167 7, 160 7, 156 19 C 152 32, 150 45, 152 49 C 154 46, 160 36, 166 36 C 170 36, 168 46, 172 49 C 176 51, 182 47, 187 40"
+                      stroke="url(#roseInkGrad)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
+                <!-- "i" -> "n" -> "e" + long airy sanctuary flourish -->
+                <path d="M187 37 C 185 43, 185 49, 190 49 C 195 49, 201 36, 206 36 C 210 36, 208 45, 207 49 C 210 48, 217 35, 222 36 C 227 37, 224 46, 229 49 C 234 51, 245 45, 248 38 C 250 34, 243 33, 239 38 C 235 44, 240 50, 251 49 C 261 48, 269 44, 275 41"
+                      stroke="url(#roseInkGrad)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" />
+                <!-- Delicate Champagne-Gold Star & Rose Dewdrop Accents -->
+                <path d="M190 25 L191.2 27.8 L194 29 L191.2 30.2 L190 33 L188.8 30.2 L186 29 L188.8 27.8 Z" fill="#FFE8C8" opacity="0.92" />
+                <circle cx="37" cy="30" r="1.3" fill="#FFD9E8" opacity="0.82" />
+                <circle cx="265" cy="51" r="1.2" fill="#FFE8C8" opacity="0.78" />
+              </svg>
+              <span id="text-calligraphy">Seraphine</span>
+            </div>
+
+            <div class="subtitle-box">
+              <div id="subtitle-normal" class="subtitle-line">栖薇 · <span id="file-count">9</span> 阕圣咏残章</div>
+              <div id="subtitle-drop" class="subtitle-line">松手，封入栖薇的圣堂</div>
+            </div>
+          </div>
+
+          <!-- Image 3's Gothic Pointed-Arch Cathedral Window with Embedded Rose! -->
+          <svg class="seal-icon" viewBox="0 0 34 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <!-- Outer & Inner Pointed Gothic Arch -->
+            <path d="M4 44 V 21 C 4 11, 11 4.5, 17 2 C 23 4.5, 30 11, 30 21 V 44 H 4 Z"
+                  stroke="rgba(246, 238, 245, 0.86)" stroke-width="1.2" />
+            <path d="M6.5 42 V 21.5 C 6.5 13, 12 7.2, 17 4.8 C 22 7.2, 27.5 13, 27.5 21.5 V 42 H 6.5 Z"
+                  stroke="rgba(246, 238, 245, 0.56)" stroke-width="0.85" />
+            <!-- Upper Gothic Rose-Window Rosette & Trefoils -->
+            <circle cx="17" cy="13.5" r="4.2" stroke="rgba(246, 238, 245, 0.78)" stroke-width="0.9" />
+            <circle cx="17" cy="13.5" r="1.4" fill="rgba(255, 228, 200, 0.85)" />
+            <circle cx="11.2" cy="19" r="2.3" stroke="rgba(246, 238, 245, 0.65)" stroke-width="0.8" />
+            <circle cx="22.8" cy="19" r="2.3" stroke="rgba(246, 238, 245, 0.65)" stroke-width="0.8" />
+            <!-- Vertical Mullions -->
+            <line x1="11.2" y1="21.3" x2="11.2" y2="42" stroke="rgba(246, 238, 245, 0.55)" stroke-width="0.8" />
+            <line x1="22.8" y1="21.3" x2="22.8" y2="42" stroke="rgba(246, 238, 245, 0.55)" stroke-width="0.8" />
+            <line x1="6.5" y1="36.5" x2="27.5" y2="36.5" stroke="rgba(246, 238, 245, 0.42)" stroke-width="0.75" />
+            <!-- Embedded Miniature Stemmed Rose in Center Pane (Image 3 Signature Detail!) -->
+            <path d="M17 29.5 V 42" stroke="rgba(255, 234, 206, 0.88)" stroke-width="1.0" stroke-linecap="round" />
+            <path d="M17 35 C 14.2 34.2, 13.5 32.5, 15.2 32.2 C 16.3 32, 16.8 33.4, 17 35 Z" fill="rgba(246, 238, 245, 0.75)" />
+            <path d="M17 34 C 19.8 33.2, 20.5 31.5, 18.8 31.2 C 17.7 31, 17.2 32.4, 17 34 Z" fill="rgba(246, 238, 245, 0.75)" />
+            <path d="M13.5 26.2 C 13.2 23.6, 15 22.2, 17 22.2 C 19 22.2, 20.8 23.6, 20.5 26.2 C 20.2 28.4, 18.6 29.6, 17 29.6 C 15.4 29.6, 13.8 28.4, 13.5 26.2 Z"
+                  stroke="rgba(255, 234, 206, 0.92)" stroke-width="1.0" fill="rgba(255, 214, 232, 0.25)" />
+            <path d="M15.1 25.5 C 15.8 24.2, 18.2 24.2, 18.9 25.5 C 18.2 27.1, 15.8 27.1, 15.1 25.5 Z"
+                  stroke="rgba(255, 238, 214, 0.88)" stroke-width="0.85" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fanned Stained-Glass Scripture Cards -->
+    <div id="card-fan-layer" aria-label="栖薇的圣咏残章"></div>
+
+    <!-- Whisper-subtle Dual-Sanctuary Theme Switch + Calligraphy Picker + Audio -->
+    <div id="top-bar">
+      <button class="pill-ctrl active" data-theme="opaline" id="btn-theme-opaline" title="图3+图4：晨曦欧泊粉蓝琉璃">晨曦欧泊</button>
+      <button class="pill-ctrl" data-theme="crimson" id="btn-theme-crimson" title="图2：午夜圣血酒红暗金雕花">午夜圣血</button>
+      <span class="ctrl-sep" aria-hidden="true"></span>
+      <button class="pill-ctrl active" data-font="1" id="btn-font-1" title="手写花体">花体</button>
+      <button class="pill-ctrl" data-font="2" id="btn-font-2" title="古典草书">斜体</button>
+      <button class="pill-ctrl" data-font="3" id="btn-font-3" title="衬线镌刻">衬线</button>
+      <button class="pill-ctrl" data-font="4" id="btn-font-4" title="极简纤体">纤体</button>
+      <button class="pill-ctrl active" id="btn-audio" title="圣堂八音盒泛音">音 · 开</button>
+    </div>
+
+    <div id="hint-whisper">轻点开合 · 拂花落瓣 · 拖入左下残章 · 长按卷起琉璃花瓣风暴</div>
+  </main>
+
+  <script>
+  (() => {
+    'use strict';
+
+    // =========================================================================
+    // 1. BESPOKE ROSE-SANCTUARY PERSONA ("Seraphine · 栖薇") & 9 RELIQUARY FILES
+    // =========================================================================
+    const INITIAL_FILES = [
+      { ext: 'm4a', name: '晚祷钟声' },
+      { ext: 'png', name: '琉璃花窗' },
+      { ext: 'md',  name: '带刺情诗' },
+      { ext: 'wav', name: '烛火圣咏' },
+      { ext: 'jpg', name: '丁达尔光' },
+      { ext: 'txt', name: '栖薇手札' },
+      { ext: 'mov', name: '坠落花瓣' },
+      { ext: 'raw', name: '荆棘王冠' },
+      { ext: 'mp3', name: '午夜管风琴' }
+    ];
+
+    const EXTRA_POOL = [
+      { ext: 'png', name: '金箔书签' },
+      { ext: 'md',  name: '玫瑰灰烬' },
+      { ext: 'jpg', name: '破晓花露' },
+      { ext: 'm4a', name: '第四乐章' },
+      { ext: 'psd', name: '暗金藤蔓' },
+      { ext: 'raw', name: '古堡月色' },
+      { ext: 'mov', name: '雾紫纱幔' },
+      { ext: 'txt', name: '火漆密信' }
+    ];
+    let extraPoolIdx = 0;
+
+    // Dual-Sanctuary Theme Palettes:
+    // 1) "opaline" = Image 4 (warm candlelit pink core + sky-blue/lavender petals) + Image 3 (ice-blue crystal shimmer + warm champagne gold rim)
+    // 2) "crimson" = Image 2 (deep burgundy-ruby velvet core + royal amethyst/midnight sapphire petals + antique gold Gothic filigree frame)
+    const THEMES = {
+      opaline: {
+        name: 'opaline',
+        haloInner: 'rgba(196, 152, 224, 0.16)',
+        haloMid:   'rgba(116, 154, 218, 0.09)',
+        tyndallA:  'rgba(255, 228, 206, 0.055)',
+        tyndallB:  'rgba(176, 206, 255, 0.045)',
+        glassBase: 'rgba(15, 11, 22, 0.985)',
+        frostTop:  'rgba(168, 144, 196, 0.16)',
+        frostMid:  'rgba(96, 82, 126, 0.15)',
+        frostBot:  'rgba(38, 30, 54, 0.34)',
+        backTop:   'rgba(96, 80, 112, 0.48)',
+        backMid:   'rgba(56, 46, 72, 0.54)',
+        backBot:   'rgba(26, 20, 36, 0.62)',
+        rimBright: [255, 234, 202],
+        rimSoft:   [216, 188, 218],
+        goldStroke:[246, 218, 178],
+        goldDeep:  [168, 132, 96],
+        leafDark:  [36, 74, 72],
+        leafLight: [82, 136, 128],
+        leafVein:  'rgba(238, 208, 164, 0.56)',
+        spotGlow:  [255, 222, 196],
+        filigree:  false,
+        bokehColors: [
+          [255, 214, 182], // Warm champagne candle
+          [246, 178, 224], // Opaline blush rose
+          [162, 212, 255], // Ice-cerulean crystal
+          [202, 178, 255]  // Misty lavender
+        ],
+        roseVariants: [
+          // Variant A: Image 4 Hero (Warm Candlelit Blush Heart -> Opal Lavender -> Cerulean Sky-Blue Outer)
+          {
+            coreGlow: [255, 232, 240],
+            innerTop: [255, 188, 218],
+            innerBot: [164, 78,  132],
+            midTop:   [228, 178, 242],
+            midBot:   [104, 82,  166],
+            outerTop: [152, 206, 252],
+            outerBot: [64,  84,  156],
+            aura:     'rgba(246, 176, 226, 0.34)'
+          },
+          // Variant B: Image 3 Opaline (Luminous Ice-Blue Moonstone Heart -> Lilac -> Misty Rose Outer)
+          {
+            coreGlow: [216, 248, 255],
+            innerTop: [168, 228, 255],
+            innerBot: [78,  118, 192],
+            midTop:   [206, 184, 248],
+            midBot:   [108, 84,  174],
+            outerTop: [238, 186, 228],
+            outerBot: [112, 74,  142],
+            aura:     'rgba(162, 218, 255, 0.32)'
+          },
+          // Variant C: Balanced Twilight Vitrail (Warm Rose-Gold Core -> Periwinkle -> Amethyst Mist)
+          {
+            coreGlow: [255, 230, 222],
+            innerTop: [248, 182, 212],
+            innerBot: [152, 74,  128],
+            midTop:   [178, 194, 248],
+            midBot:   [82,  96,  168],
+            outerTop: [212, 174, 236],
+            outerBot: [88,  68,  144],
+            aura:     'rgba(220, 176, 246, 0.32)'
+          }
+        ]
+      },
+
+      crimson: {
+        name: 'crimson',
+        haloInner: 'rgba(186, 28, 78, 0.22)',
+        haloMid:   'rgba(88, 36, 138, 0.13)',
+        tyndallA:  'rgba(244, 182, 118, 0.055)',
+        tyndallB:  'rgba(196, 38, 88, 0.055)',
+        glassBase: 'rgba(11, 6, 16, 0.985)',
+        frostTop:  'rgba(116, 48, 96, 0.15)',
+        frostMid:  'rgba(58, 24, 74, 0.16)',
+        frostBot:  'rgba(22, 10, 32, 0.38)',
+        backTop:   'rgba(74, 36, 78, 0.54)',
+        backMid:   'rgba(42, 20, 52, 0.60)',
+        backBot:   'rgba(18, 10, 26, 0.68)',
+        rimBright: [248, 208, 144],
+        rimSoft:   [176, 132, 96],
+        goldStroke:[242, 198, 132],
+        goldDeep:  [148, 102, 54],
+        leafDark:  [20, 44, 40],
+        leafLight: [46, 86, 74],
+        leafVein:  'rgba(232, 188, 118, 0.64)',
+        spotGlow:  [248, 188, 136],
+        filigree:  true,
+        bokehColors: [
+          [246, 196, 128], // Antique cathedral gold
+          [224, 46,  96],  // Crimson velvet ruby
+          [152, 82,  224], // Royal amethyst
+          [88,  132, 232]  // Midnight sapphire
+        ],
+        roseVariants: [
+          // Variant A: Image 2 Hero (Deep Burgundy-Ruby Velvet Heart -> Royal Amethyst -> Midnight Sapphire Outer)
+          {
+            coreGlow: [255, 96,  132],
+            innerTop: [212, 22,  68],
+            innerBot: [78,  4,   26],
+            midTop:   [148, 38,  128],
+            midBot:   [48,  12,  68],
+            outerTop: [78,  94,  188],
+            outerBot: [24,  24,  72],
+            aura:     'rgba(214, 28, 78, 0.34)'
+          },
+          // Variant B: Gothic Blood-Rose & Violet Stained Glass
+          {
+            coreGlow: [255, 112, 144],
+            innerTop: [198, 20,  64],
+            innerBot: [72,  4,   24],
+            midTop:   [132, 52,  168],
+            midBot:   [44,  14,  78],
+            outerTop: [138, 42,  118],
+            outerBot: [42,  10,  52],
+            aura:     'rgba(168, 42, 156, 0.32)'
+          },
+          // Variant C: Cathedral Wine & Sapphire
+          {
+            coreGlow: [255, 128, 128],
+            innerTop: [206, 28,  62],
+            innerBot: [76,  6,   22],
+            midTop:   [116, 44,  144],
+            midBot:   [38,  12,  66],
+            outerTop: [72,  108, 184],
+            outerBot: [22,  28,  72],
+            aura:     'rgba(218, 48, 88, 0.32)'
+          }
+        ]
+      }
+    };
+
+    let currentTheme = THEMES.opaline;
+
+    // =========================================================================
+    // 2. PROCEDURAL WEB AUDIO (Cathedral Celesta & Crystal Music-Box Harmonics)
+    // =========================================================================
+    let audioCtx = null;
+    let audioEnabled = true;
+    let vortexDrone = null;
+    // Romantic D-minor / F-major Cathedral Celesta Scale
+    const CELESTA_HZ = [587.33, 659.25, 698.46, 880.00, 932.33, 1046.50, 1174.66, 1318.51, 1396.91, 1760.00];
+
+    function ensureAudio() {
+      if (!audioEnabled) return null;
+      if (!audioCtx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) audioCtx = new AC();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume().catch(() => {});
+      }
+      return audioCtx;
+    }
+
+    let lastChimeAt = 0;
+    function playCelesta(noteIndex = -1, gainPeak = 0.042, dur = 1.05) {
+      const ctx = ensureAudio();
+      if (!ctx) return;
+      const now = ctx.currentTime;
+      if (noteIndex === -1 && now - lastChimeAt < 0.08) return;
+      lastChimeAt = now;
+
+      const idx = noteIndex >= 0 ? noteIndex % CELESTA_HZ.length : Math.floor(Math.random() * CELESTA_HZ.length);
+      const freq = CELESTA_HZ[idx] * (0.997 + Math.random() * 0.006);
+
+      const osc = ctx.createOscillator();
+      const overtone = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const ovGain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+      // Music-box bell chime 3rd harmonic burst that decays quickly
+      overtone.type = 'sine';
+      overtone.frequency.setValueAtTime(freq * 3.0, now);
+      ovGain.gain.setValueAtTime(0.18, now);
+      ovGain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(gainPeak, now + 0.010);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+      osc.connect(gain);
+      overtone.connect(ovGain);
+      ovGain.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(now);
+      overtone.start(now);
+      osc.stop(now + dur + 0.05);
+      overtone.stop(now + dur + 0.05);
+    }
+
+    function playBloomDropSound() {
+      const ctx = ensureAudio();
+      if (!ctx) return;
+      [0, 2, 3, 6].forEach((n, i) => {
+        setTimeout(() => playCelesta(n, 0.038, 1.2), i * 75);
+      });
+    }
+
+    function playPetalScatterSound() {
+      const ctx = ensureAudio();
+      if (!ctx) return;
+      [7, 5, 3, 2, 0].forEach((n, i) => {
+        setTimeout(() => playCelesta(n, 0.032, 1.05), i * 62);
+      });
+    }
+
+    function startVortexSound() {
+      const ctx = ensureAudio();
+      if (!ctx || vortexDrone) return;
+      const now = ctx.currentTime;
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc1.type = 'sine';
+      osc2.type = 'triangle';
+      osc1.frequency.setValueAtTime(293.66, now); // D4
+      osc1.frequency.exponentialRampToValueAtTime(587.33, now + 2.2);
+      osc2.frequency.setValueAtTime(440.00, now); // A4 Cathedral Fifth
+      osc2.frequency.exponentialRampToValueAtTime(880.00, now + 2.2);
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.036, now + 0.45);
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(ctx.destination);
+      osc1.start(now);
+      osc2.start(now);
+      vortexDrone = { osc1, osc2, gain };
+    }
+
+    function stopVortexSound(burst = false) {
+      if (vortexDrone && audioCtx) {
+        const now = audioCtx.currentTime;
+        vortexDrone.gain.gain.cancelScheduledValues(now);
+        vortexDrone.gain.gain.setValueAtTime(Math.max(0.0002, vortexDrone.gain.gain.value || 0.02), now);
+        vortexDrone.gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.30);
+        vortexDrone.osc1.stop(now + 0.34);
+        vortexDrone.osc2.stop(now + 0.34);
+        vortexDrone = null;
+      }
+      if (burst) {
+        [0, 2, 3, 5, 6, 8, 9].forEach((n, i) => {
+          setTimeout(() => playCelesta(n, 0.038, 1.5), i * 40);
+        });
+      }
+    }
+
+    // =========================================================================
+    // 3. CANVAS, VELVETY FROSTED BLUR & THEME-AWARE BOKEH/PETAL SPRITES
+    // =========================================================================
+    const canvas = document.getElementById('scene');
+    const ctx = canvas.getContext('2d', { alpha: false });
+
+    const pocketCanvas = document.createElement('canvas');
+    const pocketCtx = pocketCanvas.getContext('2d');
+
+    const blurNear = document.createElement('canvas');
+    const blurNearCtx = blurNear.getContext('2d');
+    const blurDeep = document.createElement('canvas');
+    const blurDeepCtx = blurDeep.getContext('2d');
+    const kawaseTmp = document.createElement('canvas');
+    const kawaseTmpCtx = kawaseTmp.getContext('2d');
+    const compBlur = document.createElement('canvas');
+    const compBlurCtx = compBlur.getContext('2d');
+
+    const supportsCtxFilter = (() => {
+      try {
+        const tc = document.createElement('canvas');
+        tc.width = 16; tc.height = 16;
+        const tg = tc.getContext('2d');
+        if (!('filter' in tg)) return false;
+        tg.filter = 'blur(3px)';
+        tg.fillStyle = '#fff';
+        tg.fillRect(7, 7, 2, 2);
+        return tg.getImageData(4, 7, 1, 1).data[3] > 0;
+      } catch (_) {
+        return false;
+      }
+    })();
+
+    function smoothKawasePass(srcCanvas, dstCanvas, dstCtx, passes = 2) {
+      const w = dstCanvas.width;
+      const h = dstCanvas.height;
+      kawaseTmp.width = w;
+      kawaseTmp.height = h;
+
+      dstCtx.clearRect(0, 0, w, h);
+      dstCtx.imageSmoothingEnabled = true;
+      dstCtx.drawImage(srcCanvas, 0, 0, w, h);
+
+      for (let i = 0; i < passes; i++) {
+        const d = 0.85 + i * 0.75;
+        kawaseTmpCtx.clearRect(0, 0, w, h);
+        kawaseTmpCtx.globalAlpha = 0.25;
+        kawaseTmpCtx.drawImage(dstCanvas, -d, -d, w, h);
+        kawaseTmpCtx.drawImage(dstCanvas,  d, -d, w, h);
+        kawaseTmpCtx.drawImage(dstCanvas, -d,  d, w, h);
+        kawaseTmpCtx.drawImage(dstCanvas,  d,  d, w, h);
+        kawaseTmpCtx.globalAlpha = 1;
+
+        dstCtx.clearRect(0, 0, w, h);
+        dstCtx.drawImage(kawaseTmp, 0, 0, w, h);
+      }
+    }
+
+    const grainCanvas = document.createElement('canvas');
+    grainCanvas.width = 96;
+    grainCanvas.height = 96;
+    {
+      const gCtx = grainCanvas.getContext('2d');
+      const img = gCtx.createImageData(96, 96);
+      for (let i = 0; i < img.data.length; i += 4) {
+        const v = 205 + Math.floor(Math.random() * 50);
+        img.data[i] = Math.min(255, v + 8);
+        img.data[i + 1] = v;
+        img.data[i + 2] = Math.min(255, v + 10);
+        img.data[i + 3] = Math.floor(Math.random() * 12);
+      }
+      gCtx.putImageData(img, 0, 0);
+    }
+    let grainPattern = null;
+
+    let bokehSprites = [];
+    function rebuildBokehAndPetalSprites() {
+      bokehSprites = [];
+      const colors = currentTheme.bokehColors;
+      const [gR, gG, gB] = currentTheme.goldStroke;
+
+      colors.forEach(([r, g, b]) => {
+        // 1) Soft Out-of-Focus Lens Bokeh Halo
+        const c1 = document.createElement('canvas');
+        c1.width = 96;
+        c1.height = 96;
+        const g1 = c1.getContext('2d');
+        const rad = g1.createRadialGradient(48, 48, 2, 48, 48, 46);
+        rad.addColorStop(0.0, `rgba(${r}, ${g}, ${b}, 0.56)`);
+        rad.addColorStop(0.55, `rgba(${r}, ${g}, ${b}, 0.34)`);
+        rad.addColorStop(0.82, `rgba(255, 244, 232, 0.24)`);
+        rad.addColorStop(1.0, `rgba(${r}, ${g}, ${b}, 0.0)`);
+        g1.fillStyle = rad;
+        g1.beginPath();
+        g1.arc(48, 48, 46, 0, Math.PI * 2);
+        g1.fill();
+
+        // 2) Translucent Gold-Edged Stained-Glass Rose Petal Sprite!
+        const c2 = document.createElement('canvas');
+        c2.width = 56;
+        c2.height = 56;
+        const g2 = c2.getContext('2d');
+        g2.translate(28, 28);
+
+        const glow = g2.createRadialGradient(0, 0, 1, 0, 0, 22);
+        glow.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.55)`);
+        glow.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0)`);
+        g2.fillStyle = glow;
+        g2.beginPath();
+        g2.arc(0, 0, 22, 0, Math.PI * 2);
+        g2.fill();
+
+        // Pointed Gothic Rose Petal silhouette
+        const pGrad = g2.createLinearGradient(-10, -14, 10, 14);
+        pGrad.addColorStop(0, `rgba(255, 250, 248, 0.95)`);
+        pGrad.addColorStop(0.45, `rgba(${r}, ${g}, ${b}, 0.88)`);
+        pGrad.addColorStop(1, `rgba(${Math.max(20, r - 60)}, ${Math.max(15, g - 55)}, ${Math.max(35, b - 40)}, 0.78)`);
+        g2.fillStyle = pGrad;
+        g2.strokeStyle = `rgba(${gR}, ${gG}, ${gB}, 0.88)`;
+        g2.lineWidth = 1.15;
+
+        g2.beginPath();
+        g2.moveTo(0, -15); // Pointed rose petal tip
+        g2.bezierCurveTo(12, -8, 14, 6, 3, 13);
+        g2.quadraticCurveTo(0, 15, -3, 13);
+        g2.bezierCurveTo(-14, 6, -12, -8, 0, -15);
+        g2.closePath();
+        g2.fill();
+        g2.stroke();
+
+        // Delicate vitrail center vein
+        g2.strokeStyle = `rgba(255, 250, 240, 0.45)`;
+        g2.lineWidth = 0.7;
+        g2.beginPath();
+        g2.moveTo(0, -12);
+        g2.quadraticCurveTo(2, 0, 0, 11);
+        g2.stroke();
+
+        bokehSprites.push({ soft: c1, petal: c2, rgb: [r, g, b] });
+      });
+    }
+    rebuildBokehAndPetalSprites();
+
+    // =========================================================================
+    // 4. LAYOUT & GEOMETRY STATE
+    // =========================================================================
+    let vw = window.innerWidth;
+    let vh = window.innerHeight;
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    const folder = {
+      cx: 0,
+      cy: 0,
+      w: 392,
+      h: 256,
+      perspective: 900,
+      openAngle: 10.5 * Math.PI / 180,
+      targetOpenAngle: 10.5 * Math.PI / 180,
+      tiltX: 0,
+      tiltY: 0,
+      targetTiltX: 0,
+      targetTiltY: 0,
+      isOpen: false,
+      isHoverFolder: false,
+      isDragNear: false
+    };
+
+    const dockPile = {
+      homeX: 0,
+      homeY: 0,
+      x: 0,
+      y: 0,
+      dragging: false,
+      ext: 'png',
+      name: '金箔书签',
+      respawnAlpha: 1
+    };
+
+    let pocketDropAnim = null;
+
+    const anchorEl = document.getElementById('folder-3d-anchor');
+    const coverFaceEl = document.getElementById('cover-face-ui');
+    const cardFanEl = document.getElementById('card-fan-layer');
+    const fileCountEl = document.getElementById('file-count');
+
+    let filesState = [];
+    let roses = [];
+    let particles = [];
+    let stardust = [];
+    let ambientBokeh = [];
+    let idSeed = 1;
+
+    // Right-Edge Cascading Thorny Vine Nodes (Spring Chain for the hanging rosebud!)
+    const rightVine = {
+      nodes: [],
+      initialized: false
+    };
+    for (let i = 0; i < 8; i++) {
+      rightVine.nodes.push({ x: 0, y: 0, vx: 0, vy: 0 });
+    }
+
+    function clamp(v, lo, hi) {
+      return v < lo ? lo : (v > hi ? hi : v);
+    }
+
+    function updateLayout() {
+      vw = window.innerWidth;
+      vh = window.innerHeight;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      canvas.width = Math.round(vw * dpr);
+      canvas.height = Math.round(vh * dpr);
+      pocketCanvas.width = canvas.width;
+      pocketCanvas.height = canvas.height;
+
+      const isMobile = vw < 560;
+      folder.w = isMobile ? Math.min(308, vw * 0.76) : Math.min(400, vw * 0.45);
+      folder.h = Math.round(folder.w * 0.652);
+      folder.cx = vw * 0.5;
+      folder.cy = isMobile ? vh * 0.565 : vh * 0.555;
+
+      const bw = Math.max(96, Math.round(vw * 0.5));
+      const bh = Math.max(96, Math.round(vh * 0.5));
+      blurNear.width = bw;
+      blurNear.height = bh;
+      blurDeep.width = Math.max(48, Math.round(bw * 0.45));
+      blurDeep.height = Math.max(48, Math.round(bh * 0.45));
+      compBlur.width = bw;
+      compBlur.height = bh;
+
+      dockPile.homeX = isMobile
+        ? Math.max(48, folder.cx - folder.w * 0.36)
+        : Math.max(76, folder.cx - folder.w * 0.72);
+      dockPile.homeY = isMobile
+        ? Math.min(vh - 68, folder.cy + folder.h * 0.72)
+        : folder.cy + folder.h * 0.34;
+      if (!dockPile.dragging) {
+        dockPile.x = dockPile.homeX;
+        dockPile.y = dockPile.homeY;
+      }
+
+      anchorEl.style.width = `${folder.w}px`;
+      anchorEl.style.height = `${folder.h}px`;
+      anchorEl.style.marginLeft = `${-folder.w * 0.5}px`;
+      anchorEl.style.marginTop = `${-folder.h * 0.5}px`;
+      anchorEl.style.top = `${folder.cy}px`;
+      anchorEl.style.left = `${folder.cx}px`;
+
+      cardFanEl.style.top = `${folder.cy + folder.h * 0.44}px`;
+      cardFanEl.style.left = `${folder.cx}px`;
+
+      grainPattern = ctx.createPattern(grainCanvas, 'repeat');
+      rightVine.initialized = false;
+      layoutCards();
+    }
+
+    // =========================================================================
+    // 5. LIVING CATHEDRAL BOKEH ORBS, LUMINOUS DROPLETS & GOLD STARDUST
+    // =========================================================================
+    function initBackgroundLights() {
+      stardust = [];
+      for (let i = 0; i < 92; i++) {
+        const depth = 0.40 + Math.random() * 0.85;
+        stardust.push({
+          x: Math.random() * vw,
+          y: Math.random() * vh,
+          vx: (Math.random() - 0.36) * 22 * depth,
+          vy: -(16 + Math.random() * 28) * depth,
+          swayAmp: (14 + Math.random() * 24) * depth,
+          swayFreq: 0.60 + Math.random() * 0.95,
+          r: (0.75 + Math.random() * 1.85) * (0.75 + depth * 0.35),
+          alpha: 0.25 + Math.random() * 0.65,
+          phase: Math.random() * Math.PI * 2,
+          twinkleSpeed: 1.1 + Math.random() * 2.2,
+          depth,
+          pushX: 0,
+          pushY: 0,
+          colorIdx: i % 4
+        });
+      }
+
+      ambientBokeh = [];
+      for (let i = 0; i < 32; i++) {
+        const isDroplet = i >= 15;
+        const depth = isDroplet ? (0.65 + Math.random() * 0.65) : (0.42 + Math.random() * 0.78);
+        ambientBokeh.push({
+          x: Math.random() * vw,
+          y: Math.random() * vh,
+          vx: (Math.random() - 0.38) * 26 * depth,
+          vy: -(20 + Math.random() * 32) * depth,
+          orbitAmpX: (18 + Math.random() * 36) * depth,
+          orbitAmpY: (12 + Math.random() * 22) * depth,
+          orbitFreq: 0.42 + Math.random() * 0.72,
+          phase: Math.random() * Math.PI * 2,
+          pulseSpeed: 0.8 + Math.random() * 1.3,
+          radius: isDroplet
+            ? (6.0 + Math.random() * 8.5) * (0.8 + depth * 0.3)
+            : (20 + Math.random() * 32) * (0.75 + depth * 0.38),
+          baseAlpha: isDroplet
+            ? (0.40 + Math.random() * 0.36)
+            : (0.26 + Math.random() * 0.32),
+          isDroplet,
+          spriteIdx: i % 4,
+          depth,
+          pushX: 0,
+          pushY: 0
+        });
+      }
+    }
+
+    // =========================================================================
+    // 6. BOTANICAL & VITRAIL ROSE ARCHITECTURE (Image 4 Composition + Image 3 Thorns)
+    // =========================================================================
+    // 9 Primary Slots matching Image 4's exact silhouette:
+    // - Grand Hero Center-Right Rose + High Slender Rosebud + Left-Center Crown Rose
+    // - Right-Corner Cascading Rose + Drooping Pendant Rosebud on Trailing Vine
+    // - 4 Sub-surface Pocket Roses & Buds creating Image 4's rich blurred interior!
+    const ROSE_SLOTS = [
+      // 0: Grand Hero Rose (Top Center-Right — magnificent wide 3/4 vitrail bloom nestled above lip!)
+      { nx: 0.14,  ny: -0.63, scale: 1.56, angle: 0.11,  kind: 'full', layer: 'pocket', varIdx: 0, rootX: -0.02, rootY: 0.34, leaves: [-1, 1] },
+      // 1: Right-Corner Cascading Full Rose (spilling lushly over top-right corner of glass!)
+      { nx: 0.41,  ny: -0.37, scale: 1.24, angle: 0.34,  kind: 'full', layer: 'front',  varIdx: 0, rootX: 0.18,  rootY: -0.52, leaves: [1, -1] },
+      // 2: Left-Center Crown Rose (nestled directly into top frosted pocket lip!)
+      { nx: -0.14, ny: -0.53, scale: 1.18, angle: -0.12, kind: 'full', layer: 'pocket', varIdx: 1, rootX: -0.18, rootY: 0.32, leaves: [-1] },
+      // 3: High Slender Pointed Rosebud (rising gracefully from behind Hero Rose's right shoulder!)
+      { nx: 0.33,  ny: -0.94, scale: 0.94, angle: 0.28,  kind: 'bud',  layer: 'pocket', varIdx: 0, rootX: 0.17,  rootY: -0.60, leaves: [1] },
+      // 4: Iconic Drooping Pendant Rosebud on Right Vine (hanging down right wall!)
+      { nx: 0.52,  ny: 0.16,  scale: 0.98, angle: 2.92,  kind: 'bud',  layer: 'front',  varIdx: 2, isVineTip: true, leaves: [] },
+      // 5: Pocket-Lip Left Peeking Bud (tucked right beside folder tab!)
+      { nx: -0.27, ny: -0.48, scale: 0.86, angle: -0.28, kind: 'bud',  layer: 'pocket', varIdx: 2, rootX: -0.24, rootY: 0.18, leaves: [-1] },
+      // 6: Sub-surface Frosted Pocket Rose (Upper-Left dreamy blurred glow inside glass!)
+      { nx: -0.16, ny: -0.24, scale: 1.12, angle: -0.18, kind: 'semi', layer: 'pocket', varIdx: 0, rootX: -0.14, rootY: 0.44, leaves: [-1, 1], deepInside: true },
+      // 7: Sub-surface Frosted Pocket Rose (Center-Right dreamy blurred glow inside glass!)
+      { nx: 0.22,  ny: -0.12, scale: 1.16, angle: 0.20,  kind: 'semi', layer: 'pocket', varIdx: 1, rootX: 0.06,  rootY: 0.46, leaves: [1, -1], deepInside: true },
+      // 8: Sub-surface Deep Pocket Rose (Center-Lower warm blurred glow!)
+      { nx: 0.01,  ny: 0.08,  scale: 0.98, angle: 0.08,  kind: 'semi', layer: 'pocket', varIdx: 2, rootX: 0.02,  rootY: 0.48, leaves: [-1], deepInside: true }
+    ];
+
+    function createRose(fileId, slotIdx, spawnFresh = false) {
+      let tpl;
+      if (slotIdx < ROSE_SLOTS.length) {
+        tpl = ROSE_SLOTS[slotIdx];
+      } else {
+        // Extra roses dragged in sprout along the upper crown & right cascade!
+        const extraPositions = [
+          { nx: -0.01, ny: -0.76, scale: 1.08, angle: 0.04,  kind: 'semi', layer: 'pocket', varIdx: slotIdx % 3, rootX: -0.04, rootY: 0.25, leaves: [-1, 1] },
+          { nx: 0.49,  ny: -0.11, scale: 0.98, angle: 0.72,  kind: 'semi', layer: 'front',  varIdx: slotIdx % 3, rootX: 0.40,  rootY: -0.38, leaves: [1] },
+          { nx: 0.27,  ny: -0.54, scale: 1.06, angle: 0.24,  kind: 'full', layer: 'pocket', varIdx: slotIdx % 3, rootX: 0.12,  rootY: 0.28, leaves: [1] },
+          { nx: -0.24, ny: -0.66, scale: 0.92, angle: -0.22, kind: 'bud',  layer: 'pocket', varIdx: slotIdx % 3, rootX: -0.20, rootY: 0.22, leaves: [-1] }
+        ];
+        tpl = extraPositions[(slotIdx - ROSE_SLOTS.length) % extraPositions.length];
+      }
+
+      return {
+        id: fileId,
+        nx: tpl.nx,
+        ny: tpl.ny,
+        rootX: tpl.rootX ?? (tpl.nx * 0.5),
+        rootY: tpl.rootY ?? 0.35,
+        scale: tpl.scale,
+        baseAngle: tpl.angle,
+        angleOffset: 0,
+        angleVel: 0,
+        dispX: 0,
+        dispY: spawnFresh ? 68 : 0,
+        velX: 0,
+        velY: 0,
+        grow: spawnFresh ? 0.04 : 1.0,
+        kind: tpl.kind, // 'full' | 'semi' | 'bud'
+        layer: tpl.layer,
+        varIdx: tpl.varIdx,
+        isVineTip: Boolean(tpl.isVineTip),
+        deepInside: Boolean(tpl.deepInside),
+        leaves: tpl.leaves || [],
+        phase: Math.random() * Math.PI * 2,
+        breatheSpeed: 1.15 + (slotIdx % 4) * 0.18
+      };
+    }
+
+    function initCollection() {
+      filesState = [];
+      roses = [];
+      INITIAL_FILES.forEach((f, idx) => {
+        const fid = idSeed++;
+        filesState.push({ id: fid, ext: f.ext, name: f.name });
+        roses.push(createRose(fid, idx, false));
+      });
+      rebuildCardDOM();
+      updateFileCounter();
+    }
+
+    function updateFileCounter() {
+      fileCountEl.textContent = String(filesState.length);
+    }
+
+    // =========================================================================
+    // 7. FANNED RELIQUARY SCRIPTURE CARDS DOM
+    // =========================================================================
+    let activeCardId = null;
+
+    function rebuildCardDOM() {
+      cardFanEl.innerHTML = '';
+      filesState.forEach((file) => {
+        const card = document.createElement('div');
+        card.className = 'card-item';
+        card.dataset.id = String(file.id);
+        card.innerHTML = `
+          <div class="card-top">
+            <svg class="card-mini-mark" viewBox="0 0 14 20" fill="none">
+              <path d="M2 18V9C2 4.8 4.5 2 7 1C9.5 2 12 4.8 12 9V18H2Z" stroke="rgba(255,238,214,0.82)" stroke-width="1.1"/>
+              <circle cx="7" cy="7.2" r="2.1" stroke="rgba(255,238,214,0.78)" stroke-width="0.9"/>
+              <line x1="7" y1="10.5" x2="7" y2="17.5" stroke="rgba(255,238,214,0.65)" stroke-width="0.85"/>
+            </svg>
+            <button class="card-del-btn" type="button" aria-label="焚去 ${file.name}">删掉</button>
+          </div>
+          <div class="card-ext">${file.ext}</div>
+          <div class="card-name">${file.name}</div>
+          <svg class="card-watermark" viewBox="0 0 28 40" fill="none">
+            <path d="M4 37V17C4 9 9.5 3.5 14 1.5C18.5 3.5 24 9 24 17V37H4Z" stroke="#FFF0DC" stroke-width="1.3"/>
+            <circle cx="14" cy="12" r="4" stroke="#FFF0DC" stroke-width="1.1"/>
+            <circle cx="14" cy="24" r="3.2" fill="#FFF0DC"/>
+            <line x1="14" y1="27" x2="14" y2="36" stroke="#FFF0DC" stroke-width="1.2"/>
+          </svg>
+        `;
+
+        const delBtn = card.querySelector('.card-del-btn');
+        delBtn.addEventListener('pointerdown', (e) => e.stopPropagation());
+        delBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          deleteFileById(file.id, card);
+        });
+
+        card.addEventListener('pointerenter', (e) => {
+          if (e.pointerType === 'mouse' && folder.isOpen) {
+            activeCardId = file.id;
+            layoutCards();
+            playCelesta(-1, 0.022, 0.65);
+          }
+        });
+        card.addEventListener('pointerleave', (e) => {
+          if (e.pointerType === 'mouse' && activeCardId === file.id) {
+            activeCardId = null;
+            layoutCards();
+          }
+        });
+        card.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (!folder.isOpen) return;
+          if (activeCardId === file.id) {
+            activeCardId = null;
+          } else {
+            activeCardId = file.id;
+            playCelesta(-1, 0.030, 0.75);
+          }
+          layoutCards();
+        });
+
+        cardFanEl.appendChild(card);
+      });
+      layoutCards();
+    }
+
+    function layoutCards() {
+      const cards = cardFanEl.querySelectorAll('.card-item');
+      const n = cards.length;
+      if (!n) return;
+
+      const isMobile = vw < 560;
+      const maxSpanDeg = Math.min(isMobile ? 50 : 60, Math.max(16, (n - 1) * (isMobile ? 5.6 : 6.6)));
+      const maxHalfX = isMobile ? Math.min(vw * 0.39, 150) : Math.min(folder.w * 0.72, vw * 0.38);
+
+      cards.forEach((card, i) => {
+        if (card.classList.contains('deleting')) return;
+        const fid = Number(card.dataset.id);
+        const t = n === 1 ? 0 : (i / (n - 1)) * 2 - 1;
+        const deg = t * (maxSpanDeg * 0.5);
+        const rad = deg * Math.PI / 180;
+        const x = Math.sin(rad * 1.12) * (maxHalfX / Math.sin(Math.max(0.26, (maxSpanDeg * 0.5 * Math.PI / 180) * 1.12)));
+        const baseLiftY = isMobile ? -34 : -44;
+        const archY = baseLiftY + (1 - Math.cos(rad * 1.45)) * (isMobile ? 60 : 88);
+
+        const isActive = (fid === activeCardId);
+        card.classList.toggle('active', isActive);
+        card.style.zIndex = String(10 + i);
+
+        if (folder.isOpen) {
+          const lift = isActive ? (isMobile ? -26 : -34) : 0;
+          const sc = isActive ? 1.08 : 1.0;
+          const lx = x + Math.sin(rad) * (-lift);
+          const ly = archY - Math.cos(rad) * (-lift);
+          card.style.transitionDelay = isActive ? '0ms' : `${i * 20}ms`;
+          card.style.transform = `translate3d(${lx.toFixed(1)}px, ${ly.toFixed(1)}px, 0) rotate(${deg.toFixed(2)}deg) scale(${sc})`;
+        } else {
+          card.style.transitionDelay = '0ms';
+          card.style.transform = `translate3d(${(t * 18).toFixed(1)}px, -18px, 0) rotate(${(deg * 0.25).toFixed(2)}deg) scale(0.72)`;
+        }
+      });
+    }
+
+    function setFolderOpen(open) {
+      folder.isOpen = open;
+      activeCardId = null;
+      cardFanEl.classList.toggle('open', open);
+      playCelesta(open ? 5 : 2, 0.036, 0.95);
+      layoutCards();
+    }
+
+    function deleteFileById(fid, cardEl) {
+      const idx = filesState.findIndex(f => f.id === fid);
+      if (idx === -1) return;
+      filesState.splice(idx, 1);
+      if (activeCardId === fid) activeCardId = null;
+      updateFileCounter();
+      playPetalScatterSound();
+
+      if (cardEl) {
+        cardEl.classList.add('deleting');
+        setTimeout(() => {
+          if (cardEl.parentNode) cardEl.parentNode.removeChild(cardEl);
+          layoutCards();
+        }, 300);
+      }
+
+      const rIdx = roses.findIndex(r => r.id === fid);
+      if (rIdx !== -1) {
+        const r = roses[rIdx];
+        spawnRosePetalDissolve(r);
+        roses.splice(rIdx, 1);
+      }
+      setTimeout(layoutCards, 20);
+    }
+
+    function addNewFile(extRaw, nameRaw) {
+      const cleanExt = (extRaw || 'png').replace(/^\./, '').toLowerCase().slice(0, 5) || 'png';
+      const cleanName = (nameRaw || '圣咏残章').replace(/\.[^.]+$/, '').slice(0, 9) || '圣咏残章';
+      const fid = idSeed++;
+      const slotIdx = roses.length;
+
+      pocketDropAnim = {
+        ext: cleanExt,
+        t: 0,
+        duration: 1.05
+      };
+
+      playBloomDropSound();
+
+      filesState.push({ id: fid, ext: cleanExt, name: cleanName });
+      const newRose = createRose(fid, slotIdx, true);
+      roses.push(newRose);
+
+      const bx = folder.cx + newRose.nx * folder.w * 0.85;
+      const by = folder.cy + newRose.ny * folder.h * 0.75;
+      for (let i = 0; i < 22; i++) {
+        spawnParticle(bx + (Math.random() - 0.5) * 48, by + (Math.random() - 0.5) * 26, i % 3 === 0 ? 'goldspark' : 'ambient');
+      }
+
+      updateFileCounter();
+      rebuildCardDOM();
+    }
+
+    // =========================================================================
+    // 8. PARTICLE SYSTEM (3D-Fluttering Stained-Glass Petals, Gold Sparks & Bokeh)
+    // =========================================================================
+    function spawnParticle(x, y, mode = 'ambient', customPal = null) {
+      if (particles.length > 460) particles.shift();
+      const spriteIdx = customPal !== null ? customPal : Math.floor(Math.random() * bokehSprites.length);
+      const depthRoll = Math.random();
+      const depthLayer = depthRoll < 0.20 ? 0 : (depthRoll < 0.76 ? 1 : 2);
+
+      let vx = (Math.random() - 0.45) * 34;
+      let vy = 16 + Math.random() * 34;
+      let life = 2.8 + Math.random() * 2.6;
+      let size = depthLayer === 0 ? (15 + Math.random() * 19) : (depthLayer === 1 ? (6.2 + Math.random() * 5.8) : (1.5 + Math.random() * 2.0));
+
+      if (mode === 'ambient') {
+        vx = 8 + Math.random() * 26;
+        vy = 18 + Math.random() * 32;
+        size *= 0.88;
+      } else if (mode === 'dissolve') {
+        vx = (Math.random() - 0.4) * 72;
+        vy = -24 + Math.random() * 78;
+        life = 2.5 + Math.random() * 2.0;
+      } else if (mode === 'goldspark') {
+        vx = (Math.random() - 0.5) * 42;
+        vy = -32 - Math.random() * 48;
+        size = 1.6 + Math.random() * 2.8;
+        life = 1.5 + Math.random() * 1.3;
+      } else if (mode === 'vortex') {
+        const ang = Math.random() * Math.PI * 2;
+        const rad = 18 + Math.random() * 160;
+        x = pointer.x + Math.cos(ang) * rad;
+        y = pointer.y + Math.sin(ang) * rad;
+        vx = -Math.sin(ang) * 95;
+        vy = Math.cos(ang) * 95;
+        life = 3.2 + Math.random() * 2.2;
+      }
+
+      particles.push({
+        x, y, vx, vy,
+        rot: Math.random() * Math.PI * 2,
+        vRot: (Math.random() - 0.5) * 3.8,
+        flutterPhase: Math.random() * Math.PI * 2,
+        flutterSpeed: 2.4 + Math.random() * 3.2,
+        size,
+        depthLayer,
+        spriteIdx,
+        isGoldSpark: mode === 'goldspark',
+        age: 0,
+        life
+      });
+    }
+
+    function getRoseWorldPos(r) {
+      if (r.isVineTip && rightVine.initialized) {
+        const tip = rightVine.nodes[rightVine.nodes.length - 1];
+        return { x: tip.x, y: tip.y };
+      }
+      return {
+        x: folder.cx + r.nx * folder.w + r.dispX,
+        y: folder.cy + r.ny * folder.h + r.dispY
+      };
+    }
+
+    function spawnRosePetalDissolve(r) {
+      const pos = getRoseWorldPos(r);
+      for (let i = 0; i < 52; i++) {
+        const ox = (Math.random() - 0.5) * 58;
+        const oy = (Math.random() - 0.5) * 58;
+        spawnParticle(pos.x + ox, pos.y + oy, i % 4 === 0 ? 'goldspark' : 'dissolve');
+      }
+    }
+
+    function triggerVortexBurst() {
+      const cx = pointer.x;
+      const cy = pointer.y;
+      for (let i = 0; i < 195; i++) {
+        spawnParticle(cx + (Math.random() - 0.5) * 36, cy + (Math.random() - 0.5) * 36, 'vortex');
+      }
+      particles.forEach((p) => {
+        const dx = p.x - cx;
+        const dy = p.y - cy;
+        const dist = Math.hypot(dx, dy) + 0.001;
+        const dirX = dx / dist;
+        const dirY = dy / dist;
+        const speed = 160 + Math.random() * 490;
+        const tang = (Math.random() - 0.5) * 150;
+        p.vx = dirX * speed - dirY * tang;
+        p.vy = dirY * speed + dirX * tang;
+        p.age = 0;
+        p.life = 3.0 + Math.random() * 2.8;
+      });
+      roses.forEach((r) => {
+        const pos = getRoseWorldPos(r);
+        const dx = pos.x - cx;
+        const dy = pos.y - cy;
+        const d = Math.hypot(dx, dy) + 35;
+        r.velX += (dx / d) * 145;
+        r.velY += (dy / d) * 115;
+        r.angleVel += clamp((dx / d) * 1.4, -1.6, 1.6);
+      });
+      rightVine.nodes.forEach((nd, k) => {
+        if (k === 0) return;
+        const dx = nd.x - cx;
+        const dy = nd.y - cy;
+        const d = Math.hypot(dx, dy) + 35;
+        nd.vx += (dx / d) * 165 * (k / rightVine.nodes.length);
+        nd.vy += (dy / d) * 125 * (k / rightVine.nodes.length);
+      });
+      ambientBokeh.forEach((b) => {
+        const dx = b.x - cx;
+        const dy = b.y - cy;
+        const d = Math.hypot(dx, dy) + 40;
+        b.pushX += (dx / d) * 190;
+        b.pushY += (dy / d) * 190;
+      });
+    }
+
+    // =========================================================================
+    // 9. UNIFIED POINTER, TOUCH/DRAG & VORTEX INTERACTION
+    // =========================================================================
+    const pointer = {
+      x: vw * 0.62,
+      y: vh * 0.48,
+      smoothX: vw * 0.62,
+      smoothY: vh * 0.48,
+      vx: 0,
+      vy: 0,
+      active: false,
+      isTouch: false,
+      cursorAlpha: 0,
+      isDown: false,
+      downX: 0,
+      downY: 0,
+      downAt: 0,
+      movedDist: 0,
+      vortexActive: false,
+      vortexPower: 0,
+      ringScale: 1
+    };
+
+    let longPressTimer = null;
+    let osDragging = false;
+    let osDragExt = 'png';
+
+    function isPointInFolder(px, py, pad = 0) {
+      const hw = folder.w * 0.54 + pad;
+      const hh = folder.h * 0.54 + pad;
+      return Math.abs(px - folder.cx) <= hw && Math.abs(py - folder.cy) <= hh;
+    }
+
+    function isPointInDockPile(px, py) {
+      if (folder.isOpen || dockPile.respawnAlpha < 0.4) return false;
+      return Math.hypot(px - dockPile.x, py - dockPile.y) <= 42;
+    }
+
+    function closestEl(target, selector) {
+      return (target && typeof target.closest === 'function') ? target.closest(selector) : null;
+    }
+
+    window.addEventListener('pointerdown', (e) => {
+      if (closestEl(e.target, '#top-bar') || closestEl(e.target, '.card-item')) return;
+      ensureAudio();
+
+      pointer.isTouch = (e.pointerType === 'touch');
+      pointer.x = e.clientX;
+      pointer.y = e.clientY;
+      if (pointer.isTouch) {
+        pointer.smoothX = e.clientX;
+        pointer.smoothY = e.clientY;
+      }
+      pointer.active = true;
+      pointer.isDown = true;
+      pointer.downX = e.clientX;
+      pointer.downY = e.clientY;
+      pointer.downAt = performance.now();
+      pointer.movedDist = 0;
+
+      if (isPointInDockPile(e.clientX, e.clientY)) {
+        dockPile.dragging = true;
+        dockPile.x = e.clientX;
+        dockPile.y = e.clientY;
+        playCelesta(3, 0.03, 0.65);
+        return;
+      }
+
+      clearTimeout(longPressTimer);
+      longPressTimer = setTimeout(() => {
+        if (pointer.isDown && !dockPile.dragging && pointer.movedDist < 26 && !folder.isOpen) {
+          pointer.vortexActive = true;
+          startVortexSound();
+        }
+      }, 240);
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      pointer.isTouch = (e.pointerType === 'touch');
+      const prevX = pointer.x;
+      const prevY = pointer.y;
+      pointer.x = e.clientX;
+      pointer.y = e.clientY;
+      pointer.vx = (pointer.x - prevX) * 60;
+      pointer.vy = (pointer.y - prevY) * 60;
+      pointer.active = true;
+
+      if (pointer.isDown) {
+        pointer.movedDist = Math.hypot(pointer.x - pointer.downX, pointer.y - pointer.downY);
+        if (pointer.movedDist > 26 && !pointer.vortexActive) {
+          clearTimeout(longPressTimer);
+        }
+      }
+
+      if (dockPile.dragging) {
+        dockPile.x = pointer.x;
+        dockPile.y = pointer.y;
+        const near = isPointInFolder(pointer.x, pointer.y, 48);
+        folder.isDragNear = near;
+        document.body.classList.toggle('dragging-near', near);
+      } else if (!osDragging) {
+        folder.isHoverFolder = isPointInFolder(pointer.x, pointer.y, 12);
+      }
+
+      if (!dockPile.dragging && !pointer.vortexActive) {
+        brushRosesAndVine(pointer.x, pointer.y, pointer.vx, pointer.vy);
+        brushBackgroundLights(pointer.x, pointer.y, pointer.vx, pointer.vy);
+      }
+    });
+
+    function finishPointerUp(e) {
+      clearTimeout(longPressTimer);
+
+      if (dockPile.dragging) {
+        dockPile.dragging = false;
+        const droppedIn = isPointInFolder(pointer.x, pointer.y, 48);
+        folder.isDragNear = false;
+        document.body.classList.remove('dragging-near');
+
+        if (droppedIn) {
+          addNewFile(dockPile.ext, dockPile.name);
+          const nextItem = EXTRA_POOL[extraPoolIdx++ % EXTRA_POOL.length];
+          dockPile.ext = nextItem.ext;
+          dockPile.name = nextItem.name;
+          dockPile.respawnAlpha = 0;
+          dockPile.x = dockPile.homeX;
+          dockPile.y = dockPile.homeY;
+        }
+        pointer.isDown = false;
+        return;
+      }
+
+      if (pointer.vortexActive) {
+        pointer.vortexActive = false;
+        stopVortexSound(true);
+        triggerVortexBurst();
+        pointer.isDown = false;
+        return;
+      }
+
+      const elapsed = performance.now() - pointer.downAt;
+      if (pointer.isDown && elapsed < 320 && pointer.movedDist < 14) {
+        if (!closestEl(e.target, '#top-bar') && !closestEl(e.target, '.card-item')) {
+          if (folder.isOpen) {
+            setFolderOpen(false);
+          } else if (isPointInFolder(pointer.x, pointer.y, 20)) {
+            setFolderOpen(true);
+          }
+        }
+      }
+      pointer.isDown = false;
+    }
+
+    window.addEventListener('pointerup', finishPointerUp);
+    window.addEventListener('pointercancel', finishPointerUp);
+
+    let lastTapBgAt = 0;
+    window.addEventListener('dblclick', (e) => {
+      if (!isPointInFolder(e.clientX, e.clientY, 30) && !closestEl(e.target, '#top-bar')) {
+        document.body.classList.toggle('zen-mode');
+      }
+    });
+    window.addEventListener('touchend', (e) => {
+      if (e.changedTouches && e.changedTouches.length === 1) {
+        const t = e.changedTouches[0];
+        if (!isPointInFolder(t.clientX, t.clientY, 35) && !isPointInDockPile(t.clientX, t.clientY)) {
+          const now = performance.now();
+          if (now - lastTapBgAt < 300) {
+            document.body.classList.toggle('zen-mode');
+          }
+          lastTapBgAt = now;
+        }
+      }
+    }, { passive: true });
+
+    window.addEventListener('dragenter', (e) => {
+      e.preventDefault();
+      osDragging = true;
+      folder.isDragNear = true;
+      if (folder.isOpen) setFolderOpen(false);
+      document.body.classList.add('dragging-near');
+    });
+
+    window.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      osDragging = true;
+      pointer.x = e.clientX;
+      pointer.y = e.clientY;
+      pointer.active = true;
+      folder.isDragNear = true;
+      document.body.classList.add('dragging-near');
+    });
+
+    window.addEventListener('dragleave', (e) => {
+      if (e.clientX <= 0 || e.clientY <= 0 || e.clientX >= vw || e.clientY >= vh) {
+        osDragging = false;
+        folder.isDragNear = false;
+        document.body.classList.remove('dragging-near');
+      }
+    });
+
+    window.addEventListener('drop', (e) => {
+      e.preventDefault();
+      osDragging = false;
+      folder.isDragNear = false;
+      document.body.classList.remove('dragging-near');
+
+      const droppedFiles = e.dataTransfer && e.dataTransfer.files;
+      if (droppedFiles && droppedFiles.length > 0) {
+        Array.from(droppedFiles).slice(0, 5).forEach((f, idx) => {
+          const parts = f.name.split('.');
+          const ext = parts.length > 1 ? parts.pop() : 'dat';
+          const base = parts.join('.') || '圣咏残章';
+          setTimeout(() => addNewFile(ext, base), idx * 180);
+        });
+      } else {
+        const item = EXTRA_POOL[extraPoolIdx++ % EXTRA_POOL.length];
+        addNewFile(item.ext, item.name);
+      }
+    });
+
+    // Dual-Sanctuary Theme Switch (Opaline vs Crimson Gothic!)
+    document.querySelectorAll('[data-theme]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const th = btn.dataset.theme;
+        currentTheme = THEMES[th] || THEMES.opaline;
+        document.body.classList.toggle('theme-crimson', th === 'crimson');
+        document.body.classList.toggle('theme-opaline', th !== 'crimson');
+        document.querySelectorAll('[data-theme]').forEach(b => b.classList.toggle('active', b === btn));
+        rebuildBokehAndPetalSprites();
+        // Gentle golden shimmer burst around roses on theme transmutation!
+        roses.forEach((r, idx) => {
+          if (idx < 5) {
+            const p = getRoseWorldPos(r);
+            for (let k = 0; k < 4; k++) {
+              spawnParticle(p.x + (Math.random() - 0.5) * 36, p.y + (Math.random() - 0.5) * 36, 'goldspark');
+            }
+          }
+        });
+        playCelesta(th === 'crimson' ? 0 : 5, 0.038, 1.0);
+        setTimeout(() => playCelesta(th === 'crimson' ? 3 : 8, 0.032, 1.15), 90);
+      });
+    });
+
+    document.querySelectorAll('[data-font]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const f = btn.dataset.font;
+        document.body.className = document.body.className.replace(/\bfont-v\d\b/g, '').trim();
+        document.body.classList.add(`font-v${f}`);
+        document.querySelectorAll('[data-font]').forEach(b => b.classList.toggle('active', b === btn));
+        playCelesta(Number(f) + 1, 0.03, 0.7);
+      });
+    });
+
+    const audioBtn = document.getElementById('btn-audio');
+    audioBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      audioEnabled = !audioEnabled;
+      audioBtn.classList.toggle('active', audioEnabled);
+      audioBtn.textContent = audioEnabled ? '音 · 开' : '音 · 静';
+      if (audioEnabled) playCelesta(5, 0.035, 0.8);
+    });
+
+    function brushBackgroundLights(px, py, vx, vy) {
+      const speed = Math.hypot(vx, vy);
+      if (speed < 20) return;
+      ambientBokeh.forEach((b) => {
+        const d = Math.hypot(px - b.x, py - b.y);
+        if (d < 150) {
+          const w = (1 - d / 150) * 0.08 * b.depth;
+          b.pushX += vx * w;
+          b.pushY += vy * w;
+        }
+      });
+      stardust.forEach((s) => {
+        const d = Math.hypot(px - s.x, py - s.y);
+        if (d < 110) {
+          const w = (1 - d / 110) * 0.07 * s.depth;
+          s.pushX += vx * w;
+          s.pushY += vy * w;
+        }
+      });
+    }
+
+    let brushScatterCooldown = 0;
+    function brushRosesAndVine(px, py, vx, vy) {
+      const speed = Math.hypot(vx, vy);
+      if (speed < 24) return;
+
+      let touchedAny = false;
+      roses.forEach((r) => {
+        if (r.deepInside) return;
+        const pos = getRoseWorldPos(r);
+        const hitR = 68 * r.scale;
+        const d = Math.hypot(px - pos.x, py - pos.y);
+        if (d < hitR) {
+          const falloff = 1 - d / hitR;
+          r.velX += vx * 0.062 * falloff;
+          r.velY += vy * 0.052 * falloff;
+          r.angleVel += clamp(vx * 0.0006, -0.25, 0.25) * falloff;
+          touchedAny = true;
+        }
+      });
+
+      rightVine.nodes.forEach((nd, k) => {
+        if (k === 0) return;
+        const dn = Math.hypot(px - nd.x, py - nd.y);
+        if (dn < 58) {
+          const w = (1 - dn / 58) * (k / rightVine.nodes.length);
+          nd.vx += vx * 0.055 * w;
+          nd.vy += vy * 0.045 * w;
+          touchedAny = true;
+        }
+      });
+
+      const now = performance.now();
+      if (touchedAny && speed > 130 && now - brushScatterCooldown > 52) {
+        brushScatterCooldown = now;
+        const count = Math.min(4, 1 + Math.floor(speed / 340));
+        for (let i = 0; i < count; i++) {
+          spawnParticle(
+            px + (Math.random() - 0.5) * 28,
+            py + (Math.random() - 0.5) * 28,
+            i === 0 && Math.random() < 0.35 ? 'goldspark' : 'ambient'
+          );
+          particles[particles.length - 1].vx = vx * 0.14 + (Math.random() - 0.5) * 62;
+          particles[particles.length - 1].vy = vy * 0.12 - 14 + Math.random() * 44;
+        }
+        if (speed > 250) playCelesta(-1, 0.025, 0.8);
+      }
+    }
+
+    // =========================================================================
+    // 10. PHYSICS STEP (Thorny Stems, Hanging Vine Pendulum, Petals & Bokeh)
+    // =========================================================================
+    let lastTime = performance.now();
+    let ambientSpawnAcc = 0;
+
+    function stepSimulation(now) {
+      const dt = Math.min(0.033, Math.max(0.001, (now - lastTime) * 0.001));
+      lastTime = now;
+      const tSec = now * 0.001;
+
+      pointer.smoothX += (pointer.x - pointer.smoothX) * Math.min(1, dt * 16);
+      pointer.smoothY += (pointer.y - pointer.smoothY) * Math.min(1, dt * 16);
+
+      const wantCursor = pointer.active && (!pointer.isTouch || pointer.isDown || pointer.vortexPower > 0.02);
+      pointer.cursorAlpha += ((wantCursor ? 1 : 0) - pointer.cursorAlpha) * Math.min(1, dt * 10);
+
+      if (pointer.vortexActive) {
+        pointer.vortexPower = Math.min(1, pointer.vortexPower + dt * 2.4);
+        pointer.ringScale += (0.56 - pointer.ringScale) * dt * 10;
+        for (let i = 0; i < 5; i++) {
+          spawnParticle(pointer.x, pointer.y, 'vortex');
+        }
+      } else {
+        pointer.vortexPower = Math.max(0, pointer.vortexPower - dt * 3.5);
+        const targetRing = pointer.isDown ? 0.82 : 1.0;
+        pointer.ringScale += (targetRing - pointer.ringScale) * dt * 10;
+      }
+
+      if (folder.isOpen) {
+        folder.targetOpenAngle = 72.5 * Math.PI / 180;
+      } else if (folder.isDragNear) {
+        folder.targetOpenAngle = 24.0 * Math.PI / 180;
+      } else if (folder.isHoverFolder) {
+        folder.targetOpenAngle = 16.5 * Math.PI / 180;
+      } else {
+        folder.targetOpenAngle = 10.5 * Math.PI / 180;
+      }
+      folder.openAngle += (folder.targetOpenAngle - folder.openAngle) * Math.min(1, dt * 9.5);
+
+      const relX = clamp((pointer.smoothX - folder.cx) / (vw * 0.45), -1, 1);
+      const relY = clamp((pointer.smoothY - folder.cy) / (vh * 0.45), -1, 1);
+      const tiltScale = folder.isOpen ? 0.32 : 1.0;
+      folder.targetTiltY = relX * 6.8 * (Math.PI / 180) * tiltScale;
+      folder.targetTiltX = -relY * 5.2 * (Math.PI / 180) * tiltScale;
+      folder.tiltX += (folder.targetTiltX - folder.tiltX) * Math.min(1, dt * 8);
+      folder.tiltY += (folder.targetTiltY - folder.tiltY) * Math.min(1, dt * 8);
+
+      const degOpen = (folder.openAngle * 180 / Math.PI) - (folder.tiltX * 180 / Math.PI);
+      const degY = folder.tiltY * 180 / Math.PI;
+      coverFaceEl.style.transform = `rotateX(${(-degOpen).toFixed(2)}deg) rotateY(${degY.toFixed(2)}deg)`;
+      coverFaceEl.style.opacity = folder.isOpen ? '0.44' : '1';
+
+      if (!dockPile.dragging) {
+        const bobX = Math.sin(tSec * 1.35) * 3.2;
+        const bobY = Math.cos(tSec * 1.05) * 4.2;
+        dockPile.x += (dockPile.homeX + bobX - dockPile.x) * Math.min(1, dt * 9);
+        dockPile.y += (dockPile.homeY + bobY - dockPile.y) * Math.min(1, dt * 9);
+        dockPile.respawnAlpha = Math.min(1, dockPile.respawnAlpha + dt * 1.4);
+      }
+
+      if (pocketDropAnim) {
+        pocketDropAnim.t += dt;
+        if (pocketDropAnim.t >= pocketDropAnim.duration) {
+          pocketDropAnim = null;
+        }
+      }
+
+      // Gently shed occasional drifting crystal rose petals & golden sparks
+      ambientSpawnAcc += dt;
+      if (ambientSpawnAcc > 0.34 && !pointer.vortexActive) {
+        ambientSpawnAcc = 0;
+        const surfaceRoses = roses.filter(r => !r.deepInside);
+        if (surfaceRoses.length > 0) {
+          const rr = surfaceRoses[Math.floor(Math.random() * surfaceRoses.length)];
+          const pos = getRoseWorldPos(rr);
+          spawnParticle(
+            pos.x + (Math.random() - 0.5) * 44,
+            pos.y + (Math.random() - 0.5) * 34,
+            Math.random() < 0.24 ? 'goldspark' : 'ambient'
+          );
+        }
+      }
+
+      const sf = folder.w / 392;
+
+      // Update Right-Edge Cascading Thorny Vine Spring Chain
+      const vineRootX = folder.cx + 0.44 * folder.w;
+      const vineRootY = folder.cy - 0.38 * folder.h;
+      const segLen = 22.5 * sf;
+
+      if (!rightVine.initialized) {
+        rightVine.nodes.forEach((nd, k) => {
+          const ratio = k / (rightVine.nodes.length - 1);
+          nd.x = vineRootX + Math.sin(ratio * 1.3) * 36 * sf;
+          nd.y = vineRootY + k * segLen;
+          nd.vx = 0;
+          nd.vy = 0;
+        });
+        rightVine.initialized = true;
+      } else {
+        rightVine.nodes[0].x = vineRootX;
+        rightVine.nodes[0].y = vineRootY;
+        for (let k = 1; k < rightVine.nodes.length; k++) {
+          const nd = rightVine.nodes[k];
+          const prev = rightVine.nodes[k - 1];
+          const ratio = k / (rightVine.nodes.length - 1);
+
+          // Graceful S-curve outward bow + gentle cathedral breeze
+          const curveBiasX = Math.cos(ratio * 1.8) * 32 * sf + Math.sin(tSec * 1.45 - k * 0.4) * (16 + ratio * 22) * sf;
+          let gx = curveBiasX;
+          let gy = (155 + ratio * 42) * sf;
+
+          if (pointer.vortexPower > 0.01) {
+            const dx = pointer.x - nd.x;
+            const dy = pointer.y - nd.y;
+            gx += dx * 3.8 * pointer.vortexPower;
+            gy = gy * (1 - pointer.vortexPower * 0.84) + dy * 3.8 * pointer.vortexPower;
+          }
+
+          nd.vx += gx * dt;
+          nd.vy += gy * dt;
+          nd.vx *= Math.pow(0.05, dt);
+          nd.vy *= Math.pow(0.05, dt);
+          nd.x += nd.vx * dt;
+          nd.y += nd.vy * dt;
+
+          const dx = nd.x - prev.x;
+          const dy = nd.y - prev.y;
+          const dist = Math.hypot(dx, dy) || 0.0001;
+          const diff = (dist - segLen) / dist;
+          nd.x -= dx * diff * 0.86;
+          nd.y -= dy * diff * 0.86;
+          nd.vx -= dx * diff * 8.2;
+          nd.vy -= dy * diff * 8.2;
+        }
+      }
+
+      // Update Individual Roses (elastic woody-stem spring physics!)
+      roses.forEach((r, idx) => {
+        r.grow += (1 - r.grow) * Math.min(1, dt * 4.2);
+        const swayX = Math.sin(tSec * r.breatheSpeed + r.phase) * (r.deepInside ? 2.2 : 4.2);
+        const swayY = Math.cos(tSec * r.breatheSpeed * 0.85 + r.phase) * (r.deepInside ? 1.6 : 2.8);
+
+        if (pointer.vortexPower > 0.01 && !r.deepInside) {
+          const pos = getRoseWorldPos(r);
+          const dx = pointer.x - pos.x;
+          const dy = pointer.y - pos.y;
+          r.velX += dx * 1.5 * pointer.vortexPower * dt;
+          r.velY += dy * 1.5 * pointer.vortexPower * dt;
+          r.angleVel += clamp(-dx * 0.004, -0.6, 0.6) * pointer.vortexPower * dt;
+        }
+
+        r.velX += ((swayX - r.dispX) * 16.0) * dt;
+        r.velY += ((swayY - r.dispY) * 16.0) * dt;
+        r.velX *= Math.pow(0.075, dt);
+        r.velY *= Math.pow(0.075, dt);
+        r.dispX += r.velX * dt;
+        r.dispY += r.velY * dt;
+
+        const breezeAng = Math.sin(tSec * 1.1 + idx * 0.9) * 0.048;
+        r.angleVel += ((breezeAng - r.angleOffset) * 15.0) * dt;
+        r.angleVel *= Math.pow(0.085, dt);
+        r.angleOffset += r.angleVel * dt;
+      });
+
+      // Update Drifting Petals, Gold Sparks & Vortex Bokeh (Non-stalling air currents!)
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.age += dt;
+        if (p.age >= p.life) {
+          particles.splice(i, 1);
+          continue;
+        }
+
+        if (pointer.vortexPower > 0.05) {
+          const dx = pointer.x - p.x;
+          const dy = pointer.y - p.y;
+          const dist = Math.hypot(dx, dy) + 8;
+          const pull = (290 + 4800 / (dist + 26)) * pointer.vortexPower;
+          const swirl = (355 + 5600 / (dist + 22)) * pointer.vortexPower;
+          p.vx += ((dx / dist) * pull - (dy / dist) * swirl) * dt;
+          p.vy += ((dy / dist) * pull + (dx / dist) * swirl) * dt;
+          p.vx *= Math.pow(0.18, dt);
+          p.vy *= Math.pow(0.18, dt);
+        } else {
+          if (p.isGoldSpark) {
+            p.vy -= 38 * dt;
+            p.vx += Math.sin(tSec * 3.0 + i) * 32 * dt;
+          } else {
+            // Fluttering rose-petal aerodynamics: gentle swaying glide!
+            const driftY = (i % 3 === 0) ? -22 : 30;
+            p.vy += (driftY + Math.cos(tSec * 1.5 + i * 0.8) * 20) * dt;
+            p.vx += Math.sin(tSec * 1.9 + i * 0.7) * 40 * dt;
+          }
+          p.vx *= Math.pow(0.74, dt);
+          p.vy *= Math.pow(0.74, dt);
+        }
+
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.rot += p.vRot * dt;
+        p.flutterPhase += p.flutterSpeed * dt;
+      }
+
+      // Update Living Background Soft Bokeh Orbs & Droplets
+      ambientBokeh.forEach((b) => {
+        if (pointer.vortexPower > 0.04) {
+          const dx = pointer.x - b.x;
+          const dy = pointer.y - b.y;
+          const dist = Math.hypot(dx, dy) + 30;
+          b.pushX += ((dx / dist) * 85 - (dy / dist) * 125) * pointer.vortexPower * dt;
+          b.pushY += ((dy / dist) * 85 + (dx / dist) * 125) * pointer.vortexPower * dt;
+        }
+        const waveVx = Math.cos(tSec * b.orbitFreq + b.phase) * b.orbitAmpX;
+        const waveVy = Math.sin(tSec * b.orbitFreq * 0.8 + b.phase) * b.orbitAmpY;
+        b.x += (b.vx + waveVx + b.pushX) * dt;
+        b.y += (b.vy + waveVy + b.pushY) * dt;
+        b.pushX *= Math.pow(0.25, dt);
+        b.pushY *= Math.pow(0.25, dt);
+
+        const pad = b.radius * 2.2 + 20;
+        if (b.x < -pad) b.x = vw + pad;
+        else if (b.x > vw + pad) b.x = -pad;
+        if (b.y < -pad) b.y = vh + pad;
+        else if (b.y > vh + pad) b.y = -pad;
+      });
+
+      // Update Floating Cathedral Gold & Rose Stardust
+      stardust.forEach((s) => {
+        if (pointer.vortexPower > 0.04) {
+          const dx = pointer.x - s.x;
+          const dy = pointer.y - s.y;
+          const dist = Math.hypot(dx, dy) + 30;
+          s.pushX += ((dx / dist) * 70 - (dy / dist) * 105) * pointer.vortexPower * dt;
+          s.pushY += ((dy / dist) * 70 + (dx / dist) * 105) * pointer.vortexPower * dt;
+        }
+        const swayVx = Math.sin(tSec * s.swayFreq + s.phase) * s.swayAmp;
+        s.x += (s.vx + swayVx + s.pushX) * dt;
+        s.y += (s.vy + s.pushY) * dt;
+        s.pushX *= Math.pow(0.25, dt);
+        s.pushY *= Math.pow(0.25, dt);
+
+        if (s.x < -12) s.x = vw + 12;
+        else if (s.x > vw + 12) s.x = -12;
+        if (s.y < -12) s.y = vh + 12;
+        else if (s.y > vh + 12) s.y = -12;
+      });
+    }
+
+    // =========================================================================
+    // 11. PROCEDURAL BOTANICAL & VITRAIL ROSE RENDERING ENGINE
+    // =========================================================================
+    function projectCoverPoint(lx, ly, lz) {
+      const cyHinge = folder.h * 0.5;
+      const dy = ly - cyHinge;
+      const rx = folder.openAngle - folder.tiltX;
+      const cosX = Math.cos(rx);
+      const sinX = Math.sin(rx);
+      const y1 = cyHinge + dy * cosX - lz * sinX;
+      const z1 = -dy * sinX + lz * cosX;
+
+      const cosY = Math.cos(folder.tiltY);
+      const sinY = Math.sin(folder.tiltY);
+      const x2 = lx * cosY + z1 * sinY;
+      const z2 = -lx * sinY + z1 * cosY;
+
+      const P = folder.perspective;
+      const k = P / Math.max(120, P - z2);
+      return {
+        x: folder.cx + x2 * k,
+        y: folder.cy + y1 * k,
+        k
+      };
+    }
+
+    function drawRoundedQuadPath(g, tl, tr, br, bl, r) {
+      function lerpPt(a, b, dist) {
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const len = Math.hypot(dx, dy) || 1;
+        const t = Math.min(0.45, dist / len);
+        return { x: a.x + dx * t, y: a.y + dy * t };
+      }
+      const tl1 = lerpPt(tl, bl, r);
+      const tl2 = lerpPt(tl, tr, r);
+      const tr1 = lerpPt(tr, tl, r);
+      const tr2 = lerpPt(tr, br, r);
+      const br1 = lerpPt(br, tr, r);
+      const br2 = lerpPt(br, bl, r);
+      const bl1 = lerpPt(bl, br, r);
+      const bl2 = lerpPt(bl, tl, r);
+
+      g.beginPath();
+      g.moveTo(tl2.x, tl2.y);
+      g.lineTo(tr1.x, tr1.y);
+      g.quadraticCurveTo(tr.x, tr.y, tr2.x, tr2.y);
+      g.lineTo(br1.x, br1.y);
+      g.quadraticCurveTo(br.x, br.y, br2.x, br2.y);
+      g.lineTo(bl1.x, bl1.y);
+      g.quadraticCurveTo(bl.x, bl.y, bl2.x, bl2.y);
+      g.lineTo(tl1.x, tl1.y);
+      g.quadraticCurveTo(tl.x, tl.y, tl2.x, tl2.y);
+      g.closePath();
+    }
+
+    // Serrated Dark-Emerald & Gold-Veined Rose Leaf Cluster (Compound 3-leaflet rose foliage!)
+    function drawRoseLeafCluster(g, x, y, angle, scale, tSec) {
+      const [dkR, dkG, dkB] = currentTheme.leafDark;
+      const [ltR, ltG, ltB] = currentTheme.leafLight;
+      const [gR, gG, gB] = currentTheme.goldStroke;
+
+      g.save();
+      g.translate(x, y);
+      g.rotate(angle + Math.sin(tSec * 1.2 + x * 0.02) * 0.045);
+
+      const leaflets = [
+        { ang: 0,     len: 30 * scale, wid: 10.5 * scale, ox: 0, oy: 0 },
+        { ang: -0.62, len: 21 * scale, wid: 8.0 * scale,  ox: -2 * scale, oy: 8 * scale },
+        { ang: 0.62,  len: 21 * scale, wid: 8.0 * scale,  ox: 2 * scale,  oy: 8 * scale }
+      ];
+
+      leaflets.forEach((lf) => {
+        g.save();
+        g.translate(lf.ox, lf.oy);
+        g.rotate(lf.ang);
+
+        const lGrad = g.createLinearGradient(0, 0, lf.wid, -lf.len);
+        lGrad.addColorStop(0, `rgba(${dkR}, ${dkG}, ${dkB}, 0.94)`);
+        lGrad.addColorStop(0.65, `rgba(${ltR}, ${ltG}, ${ltB}, 0.88)`);
+        lGrad.addColorStop(1, `rgba(${dkR}, ${dkG}, ${dkB}, 0.92)`);
+
+        // Pointed rose leaflet with subtle serrated silhouette
+        g.beginPath();
+        g.moveTo(0, 0);
+        g.bezierCurveTo(-lf.wid * 1.05, -lf.len * 0.28, -lf.wid * 0.95, -lf.len * 0.72, 0, -lf.len);
+        g.bezierCurveTo(lf.wid * 0.95, -lf.len * 0.72, lf.wid * 1.05, -lf.len * 0.28, 0, 0);
+        g.closePath();
+        g.fillStyle = lGrad;
+        g.fill();
+
+        g.strokeStyle = `rgba(${gR}, ${gG}, ${gB}, 0.62)`;
+        g.lineWidth = 0.85 * scale;
+        g.stroke();
+
+        // Gold midrib + lateral feather veins
+        g.strokeStyle = currentTheme.leafVein;
+        g.lineWidth = 0.75 * scale;
+        g.beginPath();
+        g.moveTo(0, 0);
+        g.lineTo(0, -lf.len * 0.92);
+        for (let v = 1; v <= 3; v++) {
+          const vy = -lf.len * (v * 0.22);
+          const vw2 = lf.wid * (0.68 - v * 0.11);
+          g.moveTo(0, vy);
+          g.lineTo(-vw2, vy - 4 * scale);
+          g.moveTo(0, vy);
+          g.lineTo(vw2, vy - 4 * scale);
+        }
+        g.stroke();
+
+        g.restore();
+      });
+
+      g.restore();
+    }
+
+    // Sharp Golden Rose Thorn along a stem segment (Image 3 & Image 4 signature detail!)
+    function drawGoldenThorn(g, x, y, stemAngle, side, scale) {
+      const [gR, gG, gB] = currentTheme.goldStroke;
+      const [dR, dG, dB] = currentTheme.goldDeep;
+      g.save();
+      g.translate(x, y);
+      g.rotate(stemAngle + (side > 0 ? Math.PI * 0.5 : -Math.PI * 0.5));
+
+      const thLen = 7.5 * scale;
+      g.fillStyle = `rgba(${gR}, ${gG}, ${gB}, 0.92)`;
+      g.strokeStyle = `rgba(${dR}, ${dG}, ${dB}, 0.75)`;
+      g.lineWidth = 0.6 * scale;
+
+      g.beginPath();
+      g.moveTo(-2.6 * scale, 0);
+      g.quadraticCurveTo(0.5 * scale, -thLen * 0.55, 2.2 * scale, -thLen); // Hooked rose-thorn point!
+      g.quadraticCurveTo(1.8 * scale, -thLen * 0.35, 2.8 * scale, 0);
+      g.closePath();
+      g.fill();
+      g.stroke();
+      g.restore();
+    }
+
+    // Draw Curved Golden Thorny Stem from Root to Rose Head + Foliage
+    function drawThornyStemForRose(g, r, tSec) {
+      if (r.isVineTip) return;
+      const sf = (folder.w / 392) * r.grow;
+      if (sf < 0.05) return;
+
+      const x0 = folder.cx + r.rootX * folder.w;
+      const y0 = folder.cy + r.rootY * folder.h;
+      const pos = getRoseWorldPos(r);
+      const x1 = pos.x;
+      const y1 = pos.y;
+
+      const midX = (x0 + x1) * 0.5 + (r.nx >= 0 ? -26 : 24) * sf;
+      const midY = (y0 + y1) * 0.5 - 14 * sf;
+
+      const [gR, gG, gB] = currentTheme.goldStroke;
+      const [dR, dG, dB] = currentTheme.goldDeep;
+
+      g.save();
+      // Soft warm amber under-glow inside pocket so blurred frosted stems glow like Image 4 & Image 2!
+      if (r.layer === 'pocket') {
+        g.strokeStyle = `rgba(${gR}, ${gG}, ${gB}, ${r.deepInside ? 0.52 : 0.34})`;
+        g.lineWidth = (r.deepInside ? 6.5 : 4.6) * sf;
+        g.lineCap = 'round';
+        g.beginPath();
+        g.moveTo(x0, y0);
+        g.quadraticCurveTo(midX, midY, x1, y1);
+        g.stroke();
+      }
+
+      const stGrad = g.createLinearGradient(x0, y0, x1, y1);
+      stGrad.addColorStop(0, `rgba(${dR}, ${dG}, ${dB}, 0.68)`);
+      stGrad.addColorStop(0.55, `rgba(${gR}, ${gG}, ${gB}, 0.92)`);
+      stGrad.addColorStop(1, `rgba(255, 242, 214, 0.96)`);
+
+      g.strokeStyle = stGrad;
+      g.lineWidth = (r.deepInside ? 3.2 : 2.35) * sf * Math.min(1.12, r.scale);
+      g.lineCap = 'round';
+      g.beginPath();
+      g.moveTo(x0, y0);
+      g.quadraticCurveTo(midX, midY, x1, y1);
+      g.stroke();
+      g.restore();
+
+      function sampleQuad(t) {
+        const mt = 1 - t;
+        const px = mt * mt * x0 + 2 * mt * t * midX + t * t * x1;
+        const py = mt * mt * y0 + 2 * mt * t * midY + t * t * y1;
+        const tx = 2 * mt * (midX - x0) + 2 * t * (x1 - midX);
+        const ty = 2 * mt * (midY - y0) + 2 * t * (y1 - midY);
+        return { x: px, y: py, ang: Math.atan2(ty, tx) };
+      }
+
+      if (!r.deepInside) {
+        [0.34, 0.58, 0.78].forEach((t, idx) => {
+          const pt = sampleQuad(t);
+          drawGoldenThorn(g, pt.x, pt.y, pt.ang, idx % 2 === 0 ? 1 : -1, sf * 0.94);
+        });
+      }
+
+      r.leaves.forEach((side, idx) => {
+        const t = idx === 0 ? 0.68 : 0.44;
+        const pt = sampleQuad(t);
+        drawRoseLeafCluster(
+          g,
+          pt.x,
+          pt.y,
+          pt.ang + Math.PI * 0.5 + side * 0.76,
+          sf * Math.min(1.18, r.scale) * 0.88,
+          tSec
+        );
+      });
+    }
+
+    // Lush Intertwined Cathedral Rose Bramble & Foliage Crown along the Folder Lip (Image 4 & Image 2 signature!)
+    function drawCrownBramble(g, tSec, foregroundArchOnly = false) {
+      if (roses.length === 0) return;
+      const sf = folder.w / 392;
+      const [gR, gG, gB] = currentTheme.goldStroke;
+      const [dR, dG, dB] = currentTheme.goldDeep;
+      const sway = Math.sin(tSec * 1.15) * 2.5 * sf;
+
+      if (!foregroundArchOnly) {
+        // 1) High Left-Center Emerald Rose-Leaf Spray rising gracefully behind Hero & Left Crown Roses!
+        drawRoseLeafCluster(
+          g,
+          folder.cx - 0.01 * folder.w + sway,
+          folder.cy - 0.66 * folder.h,
+          -0.54,
+          sf * 1.24,
+          tSec
+        );
+        // 2) Right-Shoulder Sweeping Emerald Rose-Leaf Spray between Hero Rose & Right-Corner Rose!
+        drawRoseLeafCluster(
+          g,
+          folder.cx + 0.33 * folder.w + sway * 0.8,
+          folder.cy - 0.55 * folder.h,
+          1.18,
+          sf * 1.20,
+          tSec
+        );
+        // 3) Tab-Crevice Emerald & Gold Leaf peeking right above the folder tab notch!
+        drawRoseLeafCluster(
+          g,
+          folder.cx - 0.31 * folder.w,
+          folder.cy - 0.48 * folder.h,
+          -1.08,
+          sf * 0.96,
+          tSec
+        );
+        // 4) Center Lip Cushion Leaf
+        drawRoseLeafCluster(
+          g,
+          folder.cx + 0.05 * folder.w,
+          folder.cy - 0.49 * folder.h,
+          0.72,
+          sf * 0.92,
+          tSec
+        );
+        return;
+      }
+
+      // Foreground Golden Thorny Arch curving across the top frosted-glass lip (Image 4 & Image 2 iconic detail!)
+      g.save();
+      const ax0 = folder.cx - 0.31 * folder.w;
+      const ay0 = folder.cy - 0.47 * folder.h;
+      const axm = folder.cx - 0.14 * folder.w;
+      const aym = folder.cy - 0.59 * folder.h + sway * 0.5;
+      const ax1 = folder.cx + 0.01 * folder.w;
+      const ay1 = folder.cy - 0.48 * folder.h;
+
+      const archGrad = g.createLinearGradient(ax0, ay0, ax1, ay1);
+      archGrad.addColorStop(0, `rgba(${dR}, ${dG}, ${dB}, 0.62)`);
+      archGrad.addColorStop(0.5, `rgba(255, 240, 208, 0.92)`);
+      archGrad.addColorStop(1, `rgba(${gR}, ${gG}, ${gB}, 0.72)`);
+
+      g.strokeStyle = archGrad;
+      g.lineWidth = 2.0 * sf;
+      g.lineCap = 'round';
+      g.beginPath();
+      g.moveTo(ax0, ay0);
+      g.quadraticCurveTo(axm, aym, ax1, ay1);
+      g.stroke();
+
+      // Secondary thorny twig bridging Hero Rose base toward Right-Corner Rose!
+      const bx0 = folder.cx + 0.10 * folder.w;
+      const by0 = folder.cy - 0.49 * folder.h;
+      const bxm = folder.cx + 0.24 * folder.w;
+      const bym = folder.cy - 0.54 * folder.h - sway * 0.4;
+      const bx1 = folder.cx + 0.36 * folder.w;
+      const by1 = folder.cy - 0.45 * folder.h;
+      g.beginPath();
+      g.moveTo(bx0, by0);
+      g.quadraticCurveTo(bxm, bym, bx1, by1);
+      g.stroke();
+
+      drawGoldenThorn(g, folder.cx - 0.21 * folder.w, folder.cy - 0.525 * folder.h, -0.32, -1, sf * 0.85);
+      drawGoldenThorn(g, folder.cx - 0.08 * folder.w, folder.cy - 0.525 * folder.h, 0.32, 1, sf * 0.85);
+      drawGoldenThorn(g, folder.cx + 0.22 * folder.w, folder.cy - 0.515 * folder.h, 0.12, -1, sf * 0.90);
+      g.restore();
+    }
+
+    // Draw the Cascading Right-Edge Thorny Vine + Serrated Leaves
+    function drawRightCascadingVine(g, tSec) {
+      if (!rightVine.initialized) return;
+      const sf = folder.w / 392;
+      const nodes = rightVine.nodes;
+      const [gR, gG, gB] = currentTheme.goldStroke;
+      const [dR, dG, dB] = currentTheme.goldDeep;
+
+      g.save();
+      const vGrad = g.createLinearGradient(nodes[0].x, nodes[0].y, nodes[nodes.length - 1].x, nodes[nodes.length - 1].y);
+      vGrad.addColorStop(0, `rgba(${gR}, ${gG}, ${gB}, 0.94)`);
+      vGrad.addColorStop(0.7, `rgba(${gR}, ${gG}, ${gB}, 0.86)`);
+      vGrad.addColorStop(1, `rgba(${dR}, ${dG}, ${dB}, 0.80)`);
+
+      g.strokeStyle = vGrad;
+      g.lineWidth = 2.15 * sf;
+      g.lineCap = 'round';
+      g.beginPath();
+      g.moveTo(nodes[0].x, nodes[0].y);
+      for (let k = 1; k < nodes.length - 1; k++) {
+        const xc = (nodes[k].x + nodes[k + 1].x) * 0.5;
+        const yc = (nodes[k].y + nodes[k + 1].y) * 0.5;
+        g.quadraticCurveTo(nodes[k].x, nodes[k].y, xc, yc);
+      }
+      g.lineTo(nodes[nodes.length - 1].x, nodes[nodes.length - 1].y);
+      g.stroke();
+      g.restore();
+
+      // Leaves & Golden Thorns along the cascading right vine (matching Image 4 & Image 2!)
+      for (let k = 1; k < nodes.length - 1; k++) {
+        const prev = nodes[k - 1];
+        const next = nodes[k + 1];
+        const ang = Math.atan2(next.y - prev.y, next.x - prev.x);
+        if (k === 2 || k === 4 || k === 6) {
+          drawGoldenThorn(g, nodes[k].x, nodes[k].y, ang, k % 4 === 0 ? -1 : 1, sf * 0.92);
+        }
+        if (k === 2) {
+          drawRoseLeafCluster(g, nodes[k].x, nodes[k].y, ang - 0.62, sf * 1.02, tSec);
+        } else if (k === 4) {
+          drawRoseLeafCluster(g, nodes[k].x, nodes[k].y, ang + 2.22, sf * 1.04, tSec);
+        } else if (k === 5) {
+          drawRoseLeafCluster(g, nodes[k].x, nodes[k].y, ang - 0.82, sf * 0.84, tSec);
+        }
+      }
+    }
+
+    // Helper: Mix two RGB arrays
+    function mixRGB(a, b, t) {
+      return [
+        Math.round(a[0] + (b[0] - a[0]) * t),
+        Math.round(a[1] + (b[1] - a[1]) * t),
+        Math.round(a[2] + (b[2] - a[2]) * t)
+      ];
+    }
+
+    // Helper: Draw a Single Translucent Gold-Filigree Stained-Glass Rose Petal (Lush rounded rose shoulder + delicate cusp!)
+    function drawVitrailPetal(g, opts) {
+      const {
+        ox = 0, oy = 0, angle = 0, distY = 0, w, h, topRGB, botRGB, goldRGB,
+        alphaTop = 0.92, alphaBot = 0.84, pointed = 1.0, tracery = false, sf = 1
+      } = opts;
+
+      g.save();
+      g.translate(ox, oy);
+      g.rotate(angle);
+      g.translate(0, distY);
+
+      const midRGB = mixRGB(topRGB, botRGB, 0.46);
+      const pGrad = g.createLinearGradient(0, -h, 0, h * 0.16);
+      pGrad.addColorStop(0.0, `rgba(${Math.min(255, topRGB[0] + 22)}, ${Math.min(255, topRGB[1] + 18)}, ${Math.min(255, topRGB[2] + 18)}, ${alphaTop})`);
+      pGrad.addColorStop(0.36, `rgba(${topRGB[0]}, ${topRGB[1]}, ${topRGB[2]}, ${alphaTop * 0.96})`);
+      pGrad.addColorStop(0.72, `rgba(${midRGB[0]}, ${midRGB[1]}, ${midRGB[2]}, ${(alphaTop + alphaBot) * 0.48})`);
+      pGrad.addColorStop(1.0, `rgba(${botRGB[0]}, ${botRGB[1]}, ${botRGB[2]}, ${alphaBot})`);
+
+      // Voluptuous rounded-heart English/Gothic rose petal with a delicate rolled mucronate cusp!
+      const shoulderW = w * (pointed > 1.2 ? 0.42 : 0.72);
+      const cuspLift = pointed > 1.2 ? 0.08 : 0.045;
+      g.beginPath();
+      g.moveTo(0, 0);
+      g.bezierCurveTo(-w * 1.12, -h * 0.14, -w * 1.22, -h * 0.78, -shoulderW, -h * 0.96);
+      g.quadraticCurveTo(-shoulderW * 0.35, -h * 1.01, 0, -h * (1.0 + cuspLift));
+      g.quadraticCurveTo(shoulderW * 0.35, -h * 1.01, shoulderW, -h * 0.96);
+      g.bezierCurveTo(w * 1.22, -h * 0.78, w * 1.12, -h * 0.14, 0, 0);
+      g.closePath();
+
+      g.fillStyle = pGrad;
+      g.fill();
+
+      // Specular inner crystal highlight + Champagne-Gold Lead-Caming Outer Rim (stroked BEFORE vein beginPath!)
+      g.strokeStyle = 'rgba(255, 250, 242, 0.34)';
+      g.lineWidth = 1.35 * sf;
+      g.stroke();
+
+      g.strokeStyle = `rgba(${goldRGB[0]}, ${goldRGB[1]}, ${goldRGB[2]}, 0.90)`;
+      g.lineWidth = 0.88 * sf;
+      g.stroke();
+
+      // Whisper-delicate Stained-Glass Cathedral Veins inside outer/mid petals!
+      if (tracery) {
+        g.strokeStyle = `rgba(${goldRGB[0]}, ${goldRGB[1]}, ${goldRGB[2]}, ${currentTheme.filigree ? 0.32 : 0.18})`;
+        g.lineWidth = 0.48 * sf;
+        g.beginPath();
+        g.moveTo(0, -h * 0.10);
+        g.quadraticCurveTo(w * 0.05, -h * 0.52, 0, -h * 0.94);
+        g.moveTo(0, -h * 0.32);
+        g.quadraticCurveTo(-w * 0.44, -h * 0.54, -w * 0.74, -h * 0.78);
+        g.moveTo(0, -h * 0.32);
+        g.quadraticCurveTo(w * 0.44, -h * 0.54, w * 0.74, -h * 0.78);
+        if (currentTheme.filigree) {
+          // Subtle gothic pointed-ogive lattice in Crimson Nocturne mode (Image 2 homage!)
+          g.moveTo(-w * 0.54, -h * 0.62);
+          g.quadraticCurveTo(0, -h * 0.88, w * 0.54, -h * 0.62);
+        }
+        g.stroke();
+      }
+
+      g.restore();
+    }
+
+    // Helper: Draw a Broad FRONT-FACING Cupped Bowl Petal (curves upward across the rose heart for true 3D bowl depth!)
+    function drawFrontCuppedPetal(g, opts) {
+      const {
+        cx = 0, topY, botY, halfW, rimRGB, midRGB, bellyRGB, goldRGB, tilt = 0, sf = 1
+      } = opts;
+
+      g.save();
+      g.translate(cx, (topY + botY) * 0.5);
+      g.rotate(tilt);
+      const h = botY - topY;
+      const yTop = -h * 0.5;
+      const yBot = h * 0.5;
+
+      // Top lip catches warm candlelit/ruby inner glow; lower curved belly falls into deep velvet shadow!
+      const cGrad = g.createLinearGradient(0, yTop - 2 * sf, 0, yBot);
+      cGrad.addColorStop(0.0, `rgba(${Math.min(255, rimRGB[0] + 22)}, ${Math.min(255, rimRGB[1] + 16)}, ${Math.min(255, rimRGB[2] + 16)}, 0.95)`);
+      cGrad.addColorStop(0.35, `rgba(${midRGB[0]}, ${midRGB[1]}, ${midRGB[2]}, 0.93)`);
+      cGrad.addColorStop(1.0, `rgba(${bellyRGB[0]}, ${bellyRGB[1]}, ${bellyRGB[2]}, 0.92)`);
+
+      g.beginPath();
+      // Soft rolled rose-petal upper lip curving gently across the front of the chalice
+      g.moveTo(-halfW, yTop + h * 0.20);
+      g.bezierCurveTo(-halfW * 0.62, yTop - h * 0.12, -halfW * 0.18, yTop - h * 0.08, 0, yTop - h * 0.14);
+      g.bezierCurveTo(halfW * 0.18, yTop - h * 0.08, halfW * 0.62, yTop - h * 0.12, halfW, yTop + h * 0.20);
+      // Rounded cupped belly wrapping smoothly down to the receptacle base
+      g.bezierCurveTo(halfW * 0.96, yBot * 0.84, halfW * 0.38, yBot, 0, yBot);
+      g.bezierCurveTo(-halfW * 0.38, yBot, -halfW * 0.96, yBot * 0.84, -halfW, yTop + h * 0.20);
+      g.closePath();
+
+      g.fillStyle = cGrad;
+      g.fill();
+
+      // Luminous rolled top-lip highlight + Gold filigree outer rim (stroked BEFORE mid-vein beginPath!)
+      g.strokeStyle = 'rgba(255, 250, 240, 0.36)';
+      g.lineWidth = 1.3 * sf;
+      g.stroke();
+
+      g.strokeStyle = `rgba(${goldRGB[0]}, ${goldRGB[1]}, ${goldRGB[2]}, 0.92)`;
+      g.lineWidth = 0.88 * sf;
+      g.stroke();
+
+      // Whisper-subtle organic curved mid-vein
+      g.strokeStyle = `rgba(${goldRGB[0]}, ${goldRGB[1]}, ${goldRGB[2]}, ${currentTheme.filigree ? 0.26 : 0.14})`;
+      g.lineWidth = 0.45 * sf;
+      g.beginPath();
+      g.moveTo(0, yTop - h * 0.10);
+      g.quadraticCurveTo(halfW * 0.06, 0, 0, yBot * 0.92);
+      g.stroke();
+
+      g.restore();
+    }
+
+    // Master Procedural Rose Head Renderer ('full' | 'semi' | 'bud') — 3/4 Depth-Sorted Cathedral Vitrail Rose!
+    function drawOneRoseHead(g, r, tSec) {
+      const sf = (folder.w / 392) * r.scale * r.grow;
+      if (sf < 0.04) return;
+
+      const pos = getRoseWorldPos(r);
+      let headAngle = r.baseAngle + r.angleOffset;
+      if (r.isVineTip && rightVine.initialized) {
+        const nLast = rightVine.nodes[rightVine.nodes.length - 1];
+        const nPrev = rightVine.nodes[rightVine.nodes.length - 2];
+        headAngle = Math.atan2(nLast.y - nPrev.y, nLast.x - nPrev.x) - Math.PI * 0.5 + Math.PI;
+      }
+
+      const pal = currentTheme.roseVariants[r.varIdx % currentTheme.roseVariants.length];
+      const goldRGB = currentTheme.goldStroke;
+      const [dkR, dkG, dkB] = currentTheme.leafDark;
+      const pulse = Math.sin(tSec * r.breatheSpeed + r.phase);
+      const openBreath = 1 + pulse * 0.032;
+
+      g.save();
+      g.translate(pos.x, pos.y);
+      g.rotate(headAngle);
+
+      // 0) Sub-Surface Stained-Glass Aura (Compact jewel-toned dual-color bloom for `deepInside` frosted pocket roses!)
+      if (r.deepInside) {
+        const rBlue = 34 * sf;
+        const gBlue = g.createRadialGradient(-14 * sf, -6 * sf, 2 * sf, -12 * sf, -5 * sf, rBlue);
+        gBlue.addColorStop(0, `rgba(${pal.outerTop[0]}, ${pal.outerTop[1]}, ${pal.outerTop[2]}, 0.78)`);
+        gBlue.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        g.fillStyle = gBlue;
+        g.beginPath();
+        g.arc(-12 * sf, -5 * sf, rBlue, 0, Math.PI * 2);
+        g.fill();
+
+        const rPink = 38 * sf;
+        const gPink = g.createRadialGradient(8 * sf, -5 * sf, 2 * sf, 6 * sf, -4 * sf, rPink);
+        gPink.addColorStop(0, `rgba(${pal.innerTop[0]}, ${pal.innerTop[1]}, ${pal.innerTop[2]}, 0.88)`);
+        gPink.addColorStop(0.55, `rgba(${pal.midTop[0]}, ${pal.midTop[1]}, ${pal.midTop[2]}, 0.42)`);
+        gPink.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        g.fillStyle = gPink;
+        g.beginPath();
+        g.arc(6 * sf, -4 * sf, rPink, 0, Math.PI * 2);
+        g.fill();
+      } else {
+        const auraR = (r.kind === 'bud' ? 32 : 52) * sf;
+        const aura = g.createRadialGradient(0, -6 * sf, 2 * sf, 0, -4 * sf, auraR);
+        aura.addColorStop(0, pal.aura);
+        aura.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        g.fillStyle = aura;
+        g.beginPath();
+        g.arc(0, -4 * sf, auraR, 0, Math.PI * 2);
+        g.fill();
+      }
+
+      if (r.kind === 'bud') {
+        // ===============================================================
+        // GRACEFUL PLUMP VITRAIL ROSEBUD (High Bud & Hanging Pendant Bud!)
+        // ===============================================================
+        // Optional dainty trailing thorny tendril at tip of hanging pendant bud (Image 4 & Image 2 detail!)
+        if (r.isVineTip) {
+          g.save();
+          g.strokeStyle = `rgba(${goldRGB[0]}, ${goldRGB[1]}, ${goldRGB[2]}, 0.86)`;
+          g.lineWidth = 1.35 * sf;
+          g.beginPath();
+          g.moveTo(2 * sf, -28 * sf);
+          g.quadraticCurveTo(10 * sf, -38 * sf, 5 * sf, -48 * sf);
+          g.stroke();
+          drawGoldenThorn(g, 7 * sf, -38 * sf, -1.3, 1, sf * 0.65);
+          g.restore();
+        }
+
+        // Outer furled stained-glass guard petals (Cerulean/Sapphire & Lavender/Amethyst)
+        drawVitrailPetal(g, {
+          ox: -2 * sf, oy: 2 * sf, angle: -0.28 * openBreath, w: 13.5 * sf, h: 33 * sf,
+          topRGB: pal.outerTop, botRGB: pal.outerBot, goldRGB, pointed: 1.22, tracery: true, sf
+        });
+        drawVitrailPetal(g, {
+          ox: 2 * sf, oy: 2 * sf, angle: 0.28 * openBreath, w: 13.5 * sf, h: 33 * sf,
+          topRGB: pal.midTop, botRGB: pal.midBot, goldRGB, pointed: 1.22, tracery: true, sf
+        });
+        // Inner glowing pointed rosebud cone
+        drawVitrailPetal(g, {
+          ox: -1 * sf, oy: 1 * sf, angle: -0.10, w: 12.5 * sf, h: 35.5 * sf,
+          topRGB: pal.innerTop, botRGB: pal.innerBot, goldRGB, pointed: 1.32, tracery: false, sf
+        });
+        drawVitrailPetal(g, {
+          ox: 1.5 * sf, oy: 1 * sf, angle: 0.10, w: 12 * sf, h: 35 * sf,
+          topRGB: pal.coreGlow, botRGB: pal.innerBot, goldRGB, pointed: 1.32, tracery: false, sf
+        });
+        // Front cupped outer wrap petal hugging lower belly of the bud
+        drawFrontCuppedPetal(g, {
+          cx: 0, topY: -16 * sf, botY: 5 * sf, halfW: 11.5 * sf,
+          rimRGB: pal.innerTop, midRGB: pal.midTop, bellyRGB: pal.outerBot, goldRGB, sf
+        });
+
+        // Graceful recurved Emerald & Gold Calyx Sepals hugging the bud!
+        [-0.54, 0, 0.54].forEach((sa, idx) => {
+          g.save();
+          g.rotate(sa);
+          const sepH = (idx === 1 ? 21 : 28) * sf;
+          g.fillStyle = `rgba(${dkR}, ${dkG}, ${dkB}, 0.92)`;
+          g.strokeStyle = `rgba(${goldRGB[0]}, ${goldRGB[1]}, ${goldRGB[2]}, 0.88)`;
+          g.lineWidth = 0.85 * sf;
+          g.beginPath();
+          g.moveTo(-3.4 * sf, 5 * sf);
+          g.bezierCurveTo(-4.8 * sf, -sepH * 0.36, -1.6 * sf, -sepH * 0.78, (idx - 1) * 3.5 * sf, -sepH);
+          g.bezierCurveTo(1.6 * sf, -sepH * 0.78, 4.8 * sf, -sepH * 0.36, 3.4 * sf, 5 * sf);
+          g.closePath();
+          g.fill();
+          g.stroke();
+          g.restore();
+        });
+
+        g.restore();
+        return;
+      }
+
+      // =====================================================================
+      // 6-LAYER 3/4 CUPPED CATHEDRAL VITRAIL ROSE ('full' & 'semi')
+      // Wide foreshortened bowl + asymmetric cool-to-warm stained glass + spiral heart + front cupped petals!
+      // =====================================================================
+      const kSemi = r.kind === 'semi' ? 0.86 : 1.0;
+
+      // Subtle calyx sepals peeking beneath base of rose cup
+      [-0.95, 0.95].forEach((sa) => {
+        g.save();
+        g.translate(0, 10 * sf);
+        g.rotate(sa);
+        g.fillStyle = `rgba(${dkR}, ${dkG}, ${dkB}, 0.88)`;
+        g.strokeStyle = `rgba(${goldRGB[0]}, ${goldRGB[1]}, ${goldRGB[2]}, 0.78)`;
+        g.lineWidth = 0.8 * sf;
+        g.beginPath();
+        g.moveTo(-3.2 * sf, 0);
+        g.quadraticCurveTo(0, -24 * sf, sa > 0 ? 4 * sf : -4 * sf, -34 * sf * kSemi);
+        g.quadraticCurveTo(3.2 * sf, -18 * sf, 3.2 * sf, 0);
+        g.closePath();
+        g.fill();
+        g.stroke();
+        g.restore();
+      });
+
+      // LAYER 1: BACK & WING OUTER GUARD PETALS (Wide horizontal spread + asymmetric cerulean-to-lavender iridescence!)
+      const warmWingTop = mixRGB(pal.midTop, pal.innerTop, 0.35);
+      const warmWingBot = mixRGB(pal.midBot, pal.innerBot, 0.35);
+      const backGuardSpecs = [
+        // Upper-back center crown petal
+        { ox: -2 * sf,  oy: -4 * sf, ang: -0.14, w: 20 * sf * kSemi, h: 38 * sf * kSemi, top: mixRGB(pal.outerTop, pal.midTop, 0.5), bot: pal.midBot, pt: 0.92 },
+        // Upper-left cool cerulean/sapphire cathedral petal (Image 4 & Image 2 left-wing signature!)
+        { ox: -9 * sf,  oy: -3 * sf, ang: -0.66, w: 21.5 * sf * kSemi, h: 41 * sf * kSemi, top: pal.outerTop, bot: pal.outerBot, pt: 1.02 },
+        // Upper-right opaline-lilac / royal-amethyst petal
+        { ox: 8 * sf,   oy: -3 * sf, ang: 0.54,  w: 21.5 * sf * kSemi, h: 40 * sf * kSemi, top: pal.midTop, bot: pal.midBot, pt: 0.98 },
+        // Sweeping Far-Left Wing Guard Petal (rich stained-glass blue!)
+        { ox: -12 * sf, oy: 3 * sf,  ang: -1.24, w: 21 * sf * kSemi, h: 43 * sf * kSemi, top: pal.outerTop, bot: pal.outerBot, pt: 1.15 },
+        // Sweeping Far-Right Wing Guard Petal (warm blush-violet / burgundy-amethyst!)
+        { ox: 12 * sf,  oy: 3 * sf,  ang: 1.22,  w: 21 * sf * kSemi, h: 43 * sf * kSemi, top: warmWingTop, bot: warmWingBot, pt: 1.18 }
+      ];
+      backGuardSpecs.forEach((sp) => {
+        drawVitrailPetal(g, {
+          ox: sp.ox, oy: sp.oy,
+          angle: sp.ang * openBreath,
+          w: sp.w,
+          h: sp.h * openBreath,
+          topRGB: sp.top,
+          botRGB: sp.bot,
+          goldRGB,
+          alphaTop: 0.90,
+          alphaBot: 0.82,
+          pointed: sp.pt,
+          tracery: true,
+          sf
+        });
+      });
+
+      // LAYER 2: BACK & SIDE MIDDLE CUPPED PETALS (Framing the upper chalice!)
+      const midSpecs = [
+        { ox: -5 * sf, oy: -1 * sf, ang: -0.84, w: 17.5 * sf * kSemi, h: 32 * sf * kSemi, top: mixRGB(pal.outerTop, pal.midTop, 0.55), bot: pal.midBot },
+        { ox: 5 * sf,  oy: -1 * sf, ang: 0.84,  w: 17.5 * sf * kSemi, h: 32 * sf * kSemi, top: mixRGB(pal.midTop, pal.innerTop, 0.45), bot: pal.innerBot },
+        { ox: -4 * sf, oy: -2 * sf, ang: -0.32, w: 18 * sf * kSemi,   h: 31 * sf * kSemi, top: pal.midTop, bot: pal.innerBot },
+        { ox: 4 * sf,  oy: -2 * sf, ang: 0.30,  w: 18 * sf * kSemi,   h: 31 * sf * kSemi, top: mixRGB(pal.midTop, pal.innerTop, 0.55), bot: pal.innerBot }
+      ];
+      midSpecs.forEach((mp) => {
+        drawVitrailPetal(g, {
+          ox: mp.ox, oy: mp.oy,
+          angle: mp.ang * (0.96 + pulse * 0.025),
+          w: mp.w,
+          h: mp.h,
+          topRGB: mp.top,
+          botRGB: mp.bot,
+          goldRGB,
+          alphaTop: 0.93,
+          alphaBot: 0.86,
+          pointed: 0.88,
+          tracery: true,
+          sf
+        });
+      });
+
+      // LAYER 3: INNER CHALICE CANDLELIT / RUBY SUB-SURFACE GLOW (Illuminates inside of cup BEFORE front petals!)
+      g.save();
+      g.globalCompositeOperation = 'screen';
+      const chaliceGlow = g.createRadialGradient(0, -10 * sf, 1 * sf, 0, -9 * sf, 22 * sf * kSemi);
+      chaliceGlow.addColorStop(0.0, `rgba(${pal.coreGlow[0]}, ${pal.coreGlow[1]}, ${pal.coreGlow[2]}, 0.76)`);
+      chaliceGlow.addColorStop(0.52, `rgba(${pal.innerTop[0]}, ${pal.innerTop[1]}, ${pal.innerTop[2]}, 0.38)`);
+      chaliceGlow.addColorStop(1.0, 'rgba(0, 0, 0, 0)');
+      g.fillStyle = chaliceGlow;
+      g.beginPath();
+      g.arc(0, -9 * sf, 22 * sf * kSemi, 0, Math.PI * 2);
+      g.fill();
+      g.restore();
+
+      // LAYER 4: IMBRICATED SPIRAL ROSE HEART (True overlapping curled inner petals — ZERO flat target ellipse!)
+      // 4a. Back-left & back-right tightly cupped inner shell petals
+      drawVitrailPetal(g, {
+        ox: -3 * sf, oy: 2 * sf, angle: -0.44, w: 13.2 * sf * kSemi, h: 24.5 * sf * kSemi,
+        topRGB: pal.innerTop, botRGB: pal.innerBot, goldRGB, alphaTop: 0.95, alphaBot: 0.88, pointed: 0.82, tracery: false, sf
+      });
+      drawVitrailPetal(g, {
+        ox: 3 * sf, oy: 2 * sf, angle: 0.42, w: 13.2 * sf * kSemi, h: 24.5 * sf * kSemi,
+        topRGB: pal.innerTop, botRGB: pal.innerBot, goldRGB, alphaTop: 0.95, alphaBot: 0.88, pointed: 0.82, tracery: false, sf
+      });
+      // 4b. Central glowing pointed bud-cone inside the spiral heart
+      drawVitrailPetal(g, {
+        ox: 0, oy: 3 * sf, angle: 0.02, w: 11.8 * sf * kSemi, h: 25 * sf * kSemi,
+        topRGB: pal.coreGlow, botRGB: pal.innerBot, goldRGB, alphaTop: 0.97, alphaBot: 0.90, pointed: 1.05, tracery: false, sf
+      });
+      // 4c. Interlocking left & right spiral-swirl inner petals folding across the bud-cone!
+      [-1, 1].forEach((dir) => {
+        g.save();
+        g.translate(dir * 2.5 * sf, -8 * sf * kSemi);
+        const spGrad = g.createLinearGradient(0, -11 * sf, 0, 10 * sf);
+        spGrad.addColorStop(0, `rgba(${pal.coreGlow[0]}, ${pal.coreGlow[1]}, ${pal.coreGlow[2]}, 0.96)`);
+        spGrad.addColorStop(0.45, `rgba(${pal.innerTop[0]}, ${pal.innerTop[1]}, ${pal.innerTop[2]}, 0.92)`);
+        spGrad.addColorStop(1, `rgba(${pal.innerBot[0]}, ${pal.innerBot[1]}, ${pal.innerBot[2]}, 0.90)`);
+
+        g.beginPath();
+        g.moveTo(-dir * 9.5 * sf * kSemi, 2 * sf);
+        g.bezierCurveTo(-dir * 7 * sf * kSemi, -9.5 * sf * kSemi, dir * 4 * sf * kSemi, -10.5 * sf * kSemi, dir * 8.5 * sf * kSemi, -1 * sf);
+        g.bezierCurveTo(dir * 7 * sf * kSemi, 7.5 * sf * kSemi, -dir * 3 * sf * kSemi, 9 * sf * kSemi, -dir * 9.5 * sf * kSemi, 2 * sf);
+        g.closePath();
+        g.fillStyle = spGrad;
+        g.fill();
+        g.strokeStyle = `rgba(${goldRGB[0]}, ${goldRGB[1]}, ${goldRGB[2]}, 0.94)`;
+        g.lineWidth = 0.88 * sf;
+        g.stroke();
+        g.restore();
+      });
+
+      // LAYER 5: FRONT CUPPED BOWL PETALS (Sweeping upward across the lower half of the heart — true 3/4 rose depth!)
+      drawFrontCuppedPetal(g, {
+        cx: -10.5 * sf * kSemi,
+        topY: -7.5 * sf * kSemi,
+        botY: 12.5 * sf * kSemi,
+        halfW: 13.5 * sf * kSemi,
+        rimRGB: pal.innerTop,
+        midRGB: mixRGB(pal.outerTop, pal.midTop, 0.55),
+        bellyRGB: pal.midBot,
+        goldRGB,
+        tilt: -0.22,
+        sf
+      });
+      drawFrontCuppedPetal(g, {
+        cx: 10.5 * sf * kSemi,
+        topY: -7.5 * sf * kSemi,
+        botY: 12.5 * sf * kSemi,
+        halfW: 13.5 * sf * kSemi,
+        rimRGB: pal.coreGlow,
+        midRGB: mixRGB(pal.midTop, pal.innerTop, 0.65),
+        bellyRGB: pal.innerBot,
+        goldRGB,
+        tilt: 0.22,
+        sf
+      });
+      // Center-front primary chalice petal cradling the glowing rose throat!
+      drawFrontCuppedPetal(g, {
+        cx: 0.5 * sf,
+        topY: -5.5 * sf * kSemi,
+        botY: 15.5 * sf * kSemi,
+        halfW: 15.5 * sf * kSemi,
+        rimRGB: pal.coreGlow,
+        midRGB: pal.innerTop,
+        bellyRGB: pal.innerBot,
+        goldRGB,
+        tilt: 0.02,
+        sf
+      });
+
+      // LAYER 6: LOWER-FRONT REFLEXED GUARD PETALS (Graceful rolled-back outer petals at base of rose!)
+      if (r.kind === 'full') {
+        drawVitrailPetal(g, {
+          ox: -13 * sf, oy: 7 * sf, angle: -2.02 * openBreath,
+          w: 18 * sf, h: 27 * sf,
+          topRGB: pal.outerTop, botRGB: pal.outerBot, goldRGB,
+          alphaTop: 0.90, alphaBot: 0.82, pointed: 1.12, tracery: true, sf
+        });
+        drawVitrailPetal(g, {
+          ox: 13 * sf, oy: 7 * sf, angle: 2.02 * openBreath,
+          w: 18 * sf, h: 27 * sf,
+          topRGB: warmWingTop, botRGB: warmWingBot, goldRGB,
+          alphaTop: 0.90, alphaBot: 0.82, pointed: 1.12, tracery: true, sf
+        });
+        // Center-bottom reflexed guard lip petal
+        drawVitrailPetal(g, {
+          ox: 0, oy: 11 * sf, angle: Math.PI,
+          w: 16.5 * sf, h: 17 * sf,
+          topRGB: pal.midTop, botRGB: pal.midBot, goldRGB,
+          alphaTop: 0.88, alphaBot: 0.80, pointed: 0.95, tracery: true, sf
+        });
+      }
+
+      g.restore();
+    }
+
+    // Image 2 Tribute: Intricate Baroque/Gothic Gold Filigree Inner Frame & Corner Spandrels (in Crimson Mode!)
+    function drawGothicFiligreeFrame(g, tl, tr, br, bl, sf) {
+      if (!currentTheme.filigree) return;
+      const [gR, gG, gB] = currentTheme.goldStroke;
+
+      function bilerp(u, v) {
+        const topX = tl.x + (tr.x - tl.x) * u;
+        const topY = tl.y + (tr.y - tl.y) * u;
+        const botX = bl.x + (br.x - bl.x) * u;
+        const botY = bl.y + (br.y - bl.y) * u;
+        return {
+          x: topX + (botX - topX) * v,
+          y: topY + (botY - topY) * v
+        };
+      }
+
+      const padU = 0.028;
+      const padV = 0.042;
+      const itl = bilerp(padU, padV);
+      const itr = bilerp(1 - padU, padV);
+      const ibr = bilerp(1 - padU, 1 - padV);
+      const ibl = bilerp(padU, 1 - padV);
+
+      g.save();
+      drawRoundedQuadPath(g, itl, itr, ibr, ibl, 14 * sf);
+      g.strokeStyle = `rgba(${gR}, ${gG}, ${gB}, 0.50)`;
+      g.lineWidth = 1.05;
+      g.stroke();
+
+      // Gothic Corner Cusped Spandrel Arches (exact Image 2 architectural corner filigree!)
+      const cornerDefs = [
+        { u0: padU, v0: padV, du: 0.068, dv: 0.098 },
+        { u0: 1 - padU, v0: padV, du: -0.068, dv: 0.098 },
+        { u0: 1 - padU, v0: 1 - padV, du: -0.068, dv: -0.098 },
+        { u0: padU, v0: 1 - padV, du: 0.068, dv: -0.098 }
+      ];
+      g.strokeStyle = `rgba(${gR}, ${gG}, ${gB}, 0.58)`;
+      g.fillStyle = `rgba(${gR}, ${gG}, ${gB}, 0.18)`;
+      g.lineWidth = 0.9;
+
+      cornerDefs.forEach((cd) => {
+        const pEdgeH = bilerp(cd.u0 + cd.du, cd.v0);
+        const pEdgeV = bilerp(cd.u0, cd.v0 + cd.dv);
+        const pCtrl = bilerp(cd.u0 + cd.du * 0.28, cd.v0 + cd.dv * 0.28);
+        const pFleur = bilerp(cd.u0 + cd.du * 0.34, cd.v0 + cd.dv * 0.34);
+
+        g.beginPath();
+        g.moveTo(pEdgeH.x, pEdgeH.y);
+        g.quadraticCurveTo(pCtrl.x, pCtrl.y, pEdgeV.x, pEdgeV.y);
+        g.stroke();
+
+        // Corner Quatrefoil Jewel inside spandrel
+        const rQ = 3.4 * sf;
+        g.beginPath();
+        g.arc(pFleur.x, pFleur.y - rQ * 0.65, rQ * 0.55, 0, Math.PI * 2);
+        g.arc(pFleur.x + rQ * 0.65, pFleur.y, rQ * 0.55, 0, Math.PI * 2);
+        g.arc(pFleur.x, pFleur.y + rQ * 0.65, rQ * 0.55, 0, Math.PI * 2);
+        g.arc(pFleur.x - rQ * 0.65, pFleur.y, rQ * 0.55, 0, Math.PI * 2);
+        g.stroke();
+      });
+
+      // Side Diamond Finials + Bottom-Center Baroque Quatrefoil Clasp (matching Image 2!)
+      const clasp = bilerp(0.5, 1 - padV);
+      const rC = 5.6 * sf;
+      g.beginPath();
+      g.moveTo(clasp.x, clasp.y - rC);
+      g.quadraticCurveTo(clasp.x + rC * 0.4, clasp.y - rC * 0.4, clasp.x + rC * 1.35, clasp.y);
+      g.quadraticCurveTo(clasp.x + rC * 0.4, clasp.y + rC * 0.4, clasp.x, clasp.y + rC);
+      g.quadraticCurveTo(clasp.x - rC * 0.4, clasp.y + rC * 0.4, clasp.x - rC * 1.35, clasp.y);
+      g.quadraticCurveTo(clasp.x - rC * 0.4, clasp.y - rC * 0.4, clasp.x, clasp.y - rC);
+      g.closePath();
+      g.fill();
+      g.stroke();
+
+      [bilerp(padU, 0.48), bilerp(1 - padU, 0.48)].forEach((sfPt) => {
+        const rd = 3.5 * sf;
+        g.beginPath();
+        g.moveTo(sfPt.x, sfPt.y - rd * 1.3);
+        g.lineTo(sfPt.x + rd, sfPt.y);
+        g.lineTo(sfPt.x, sfPt.y + rd * 1.3);
+        g.lineTo(sfPt.x - rd, sfPt.y);
+        g.closePath();
+        g.fill();
+        g.stroke();
+      });
+      g.restore();
+    }
+
+    function easeOutCubic(x) {
+      return 1 - Math.pow(1 - x, 3);
+    }
+
+    function drawPocketCardsInterior(g, crispPass = false) {
+      const sf = folder.w / 392;
+      if (!crispPass && !folder.isOpen && filesState.length > 0) {
+        const count = Math.min(3, filesState.length);
+        for (let i = 0; i < count; i++) {
+          const ox = (i - 1) * 38 * sf;
+          const oy = (-10 + Math.abs(i - 1) * 12) * sf;
+          g.save();
+          g.translate(folder.cx + ox, folder.cy + oy);
+          g.rotate((i - 1) * 0.07);
+          g.fillStyle = 'rgba(232, 212, 240, 0.12)';
+          g.beginPath();
+          g.roundRect(-24 * sf, -34 * sf, 48 * sf, 68 * sf, 7 * sf);
+          g.fill();
+          g.restore();
+        }
+      }
+
+      if (pocketDropAnim) {
+        const p = pocketDropAnim.t / pocketDropAnim.duration;
+        let cyOffset = 0;
+        let alpha = 1;
+        if (p < 0.38) {
+          const k = p / 0.38;
+          cyOffset = (-75 + 88 * easeOutCubic(k)) * sf;
+        } else if (p < 0.74) {
+          const k = (p - 0.38) / 0.36;
+          const arc = Math.sin(k * Math.PI);
+          cyOffset = (13 - arc * 136) * sf;
+        } else {
+          const k = (p - 0.74) / 0.26;
+          cyOffset = (13 + k * 24) * sf;
+          alpha = 1 - k * 0.85;
+        }
+
+        const isPeekingAbove = cyOffset < -folder.h * 0.38;
+        if ((crispPass && isPeekingAbove) || (!crispPass)) {
+          const [gR, gG, gB] = currentTheme.goldStroke;
+          g.save();
+          g.translate(folder.cx, folder.cy + cyOffset);
+          g.fillStyle = `rgba(238, 224, 246, ${(0.76 * alpha).toFixed(2)})`;
+          g.strokeStyle = `rgba(${gR}, ${gG}, ${gB}, ${(0.92 * alpha).toFixed(2)})`;
+          g.lineWidth = 1.2 * sf;
+          g.beginPath();
+          g.roundRect(-21 * sf, -30 * sf, 42 * sf, 60 * sf, 7 * sf);
+          g.fill();
+          g.stroke();
+
+          g.fillStyle = `rgba(58, 36, 78, ${(0.88 * alpha).toFixed(2)})`;
+          g.font = `italic ${Math.round(12 * sf)}px Georgia, serif`;
+          g.fillText(pocketDropAnim.ext, -13 * sf, -8 * sf);
+          g.restore();
+        }
+      }
+    }
+
+    function drawDraggableMiniStack(g) {
+      const showOS = osDragging;
+      if (!showOS && (folder.isOpen || dockPile.respawnAlpha <= 0.02)) return;
+
+      const x = showOS ? pointer.x - 18 : dockPile.x;
+      const y = showOS ? pointer.y + 16 : dockPile.y;
+      const alpha = showOS ? 0.96 : dockPile.respawnAlpha * (dockPile.dragging ? 0.98 : 0.88);
+      const sf = clamp(folder.w / 392, 0.78, 1.05);
+      const extLabel = showOS ? osDragExt : dockPile.ext;
+      const [gR, gG, gB] = currentTheme.goldStroke;
+
+      g.save();
+      g.translate(x, y);
+
+      const aura = g.createRadialGradient(0, 0, 2, 0, 0, 38 * sf);
+      aura.addColorStop(0, `rgba(${gR}, ${gG}, ${gB}, ${(0.34 * alpha).toFixed(2)})`);
+      aura.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      g.fillStyle = aura;
+      g.beginPath();
+      g.arc(0, 0, 38 * sf, 0, Math.PI * 2);
+      g.fill();
+
+      g.save();
+      g.rotate(-0.14);
+      g.fillStyle = `rgba(186, 162, 218, ${(0.44 * alpha).toFixed(2)})`;
+      g.strokeStyle = `rgba(${gR}, ${gG}, ${gB}, ${(0.62 * alpha).toFixed(2)})`;
+      g.lineWidth = 1;
+      g.beginPath();
+      g.roundRect(-17 * sf, -22 * sf, 32 * sf, 42 * sf, 5.5 * sf);
+      g.fill();
+      g.stroke();
+      g.restore();
+
+      g.save();
+      g.translate(4 * sf, 2 * sf);
+      g.rotate(0.08);
+      g.fillStyle = `rgba(242, 232, 248, ${(0.86 * alpha).toFixed(2)})`;
+      g.strokeStyle = `rgba(${gR}, ${gG}, ${gB}, ${(0.95 * alpha).toFixed(2)})`;
+      g.lineWidth = 1.15;
+      g.beginPath();
+      g.roundRect(-16 * sf, -21 * sf, 32 * sf, 42 * sf, 5.5 * sf);
+      g.fill();
+      g.stroke();
+
+      g.fillStyle = `rgba(62, 38, 82, ${(0.90 * alpha).toFixed(2)})`;
+      g.font = `italic ${Math.round(10.5 * sf)}px Georgia, serif`;
+      g.fillText(extLabel, -10 * sf, 12 * sf);
+      g.restore();
+
+      g.restore();
+    }
+
+    // =========================================================================
+    // 12. MASTER RENDER LOOP (Cathedral Tyndall Rays + Frosted Glass + Roses)
+    // =========================================================================
+    function renderFrame(now) {
+      stepSimulation(now);
+      const tSec = now * 0.001;
+      const sf = folder.w / 392;
+
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, vw, vh);
+
+      // 0) Breathing Sanctuary Backlight & Subtle Diagonal Cathedral Tyndall Light Rays!
+      const haloShiftX = Math.sin(tSec * 0.5) * 24;
+      const haloShiftY = Math.cos(tSec * 0.38) * 18;
+      const ambGrad = ctx.createRadialGradient(
+        folder.cx + folder.w * 0.14 + haloShiftX,
+        folder.cy - folder.h * 0.42 + haloShiftY,
+        12,
+        folder.cx + folder.w * 0.08,
+        folder.cy - folder.h * 0.18,
+        folder.w * 1.05
+      );
+      ambGrad.addColorStop(0.0, currentTheme.haloInner);
+      ambGrad.addColorStop(0.48, currentTheme.haloMid);
+      ambGrad.addColorStop(1.0, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = ambGrad;
+      ctx.fillRect(0, 0, vw, vh);
+
+      // Ethereal Diagonal Cathedral Tyndall Shafts (gently breathing!)
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      for (let ray = 0; ray < 3; ray++) {
+        const rayBreath = 0.65 + 0.35 * Math.sin(tSec * 0.45 + ray * 1.7);
+        ctx.save();
+        ctx.translate(folder.cx + (ray - 0.6) * folder.w * 0.42, folder.cy - folder.h * 1.35);
+        ctx.rotate(-0.42 + Math.sin(tSec * 0.25 + ray) * 0.025);
+        const rw = (58 + ray * 24) * sf;
+        const rh = folder.h * 2.9;
+        const rGrad = ctx.createLinearGradient(0, 0, 0, rh);
+        rGrad.addColorStop(0.0, 'rgba(0,0,0,0)');
+        rGrad.addColorStop(0.32, ray % 2 === 0 ? currentTheme.tyndallA : currentTheme.tyndallB);
+        rGrad.addColorStop(1.0, 'rgba(0,0,0,0)');
+        ctx.globalAlpha = rayBreath;
+        ctx.fillStyle = rGrad;
+        ctx.fillRect(-rw * 0.5, 0, rw, rh);
+        ctx.restore();
+      }
+      ctx.restore();
+
+      // 1) Living, Swimming Cathedral Bokeh Light Orbs & Luminous Droplets
+      const parallaxX = -folder.tiltY * 45;
+      const parallaxY = folder.tiltX * 45;
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      ambientBokeh.forEach((b) => {
+        const pulse = 0.62 + 0.38 * Math.sin(tSec * b.pulseSpeed + b.phase);
+        const sp = bokehSprites[b.spriteIdx % bokehSprites.length];
+        const drawR = b.radius * (0.9 + 0.16 * pulse);
+        const bx = b.x + parallaxX * b.depth;
+        const by = b.y + parallaxY * b.depth;
+        ctx.globalAlpha = b.baseAlpha * pulse;
+        ctx.drawImage(sp.soft, bx - drawR, by - drawR, drawR * 2, drawR * 2);
+        if (b.isDroplet) {
+          const [r, gr, bl] = sp.rgb;
+          ctx.globalAlpha = b.baseAlpha * pulse * 0.72;
+          ctx.fillStyle = `rgba(${Math.min(255, r + 35)}, ${Math.min(255, gr + 25)}, ${Math.min(255, bl + 30)}, 0.9)`;
+          ctx.beginPath();
+          ctx.arc(bx, by, Math.max(1.5, drawR * 0.24), 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+      ctx.restore();
+
+      // 2) Floating Gold & Rose Cathedral Stardust
+      stardust.forEach((s) => {
+        const tw = 0.38 + 0.62 * (0.5 + 0.5 * Math.sin(tSec * s.twinkleSpeed + s.phase));
+        const [r, g, b] = currentTheme.bokehColors[s.colorIdx % 4];
+        const sx = s.x + parallaxX * (s.depth * 0.65);
+        const sy = s.y + parallaxY * (s.depth * 0.65);
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${(s.alpha * tw).toFixed(3)})`;
+        ctx.beginPath();
+        ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      drawParticlesByDepth(ctx, 2);
+
+      // 3) Folder Upright Backplate (with Image 3's warm champagne-gold top-tab gleam!)
+      const bLeft = folder.cx - folder.w * 0.488 + folder.tiltY * 14;
+      const bTop = folder.cy - folder.h * 0.50 - folder.tiltX * 12;
+      const bW = folder.w * 0.976;
+      const bH = folder.h * 0.99;
+      const tabH = 22 * sf;
+      const tabW = 104 * sf;
+      const rBack = 16 * sf;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(bLeft + rBack, bTop - tabH);
+      ctx.lineTo(bLeft + tabW - 14 * sf, bTop - tabH);
+      ctx.quadraticCurveTo(bLeft + tabW - 2 * sf, bTop - tabH, bLeft + tabW + 10 * sf, bTop);
+      ctx.lineTo(bLeft + bW - rBack, bTop);
+      ctx.quadraticCurveTo(bLeft + bW, bTop, bLeft + bW, bTop + rBack);
+      ctx.lineTo(bLeft + bW, bTop + bH - rBack);
+      ctx.quadraticCurveTo(bLeft + bW, bTop + bH, bLeft + bW - rBack, bTop + bH);
+      ctx.lineTo(bLeft + rBack, bTop + bH);
+      ctx.quadraticCurveTo(bLeft, bTop + bH, bLeft, bTop + bH - rBack);
+      ctx.lineTo(bLeft, bTop - tabH + rBack);
+      ctx.quadraticCurveTo(bLeft, bTop - tabH, bLeft + rBack, bTop - tabH);
+      ctx.closePath();
+
+      const backGrad = ctx.createLinearGradient(bLeft, bTop - tabH, bLeft, bTop + bH);
+      backGrad.addColorStop(0, currentTheme.backTop);
+      backGrad.addColorStop(0.38, currentTheme.backMid);
+      backGrad.addColorStop(1, currentTheme.backBot);
+      ctx.fillStyle = backGrad;
+      ctx.fill();
+
+      // Warm Champagne-Gold Specular Highlight on Folder Tab!
+      const [rbR, rbG, rbB] = currentTheme.rimBright;
+      const tabRim = ctx.createLinearGradient(bLeft, bTop - tabH, bLeft + tabW * 1.4, bTop + 20);
+      tabRim.addColorStop(0, `rgba(${rbR}, ${rbG}, ${rbB}, 0.72)`);
+      tabRim.addColorStop(0.45, `rgba(${rbR}, ${rbG}, ${rbB}, 0.28)`);
+      tabRim.addColorStop(1, `rgba(${rbR}, ${rbG}, ${rbB}, 0.08)`);
+      ctx.strokeStyle = tabRim;
+      ctx.lineWidth = 1.25;
+      ctx.stroke();
+      ctx.restore();
+
+      // 4) Render Pocket Contents onto Offscreen `pocketCanvas`
+      pocketCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      pocketCtx.clearRect(0, 0, vw, vh);
+
+      drawPocketCardsInterior(pocketCtx, false);
+
+      // Draw Stems, Crown Bramble Foliage, Deep Pocket Roses, then Crisp Upper Crown Roses!
+      roses.forEach((r) => {
+        if (r.layer === 'pocket' && r.deepInside) drawThornyStemForRose(pocketCtx, r, tSec);
+      });
+      roses.forEach((r) => {
+        if (r.layer === 'pocket' && r.deepInside) drawOneRoseHead(pocketCtx, r, tSec);
+      });
+
+      drawCrownBramble(pocketCtx, tSec, false);
+      roses.forEach((r) => {
+        if (r.layer === 'pocket' && !r.deepInside) drawThornyStemForRose(pocketCtx, r, tSec);
+      });
+      // Draw Left Crown Rose & Buds first, then Golden Lip-Arch Twig, then Grand Hero Rose on top!
+      roses.forEach((r, idx) => {
+        if (r.layer === 'pocket' && !r.deepInside && idx !== 0) drawOneRoseHead(pocketCtx, r, tSec);
+      });
+      drawCrownBramble(pocketCtx, tSec, true);
+      roses.forEach((r, idx) => {
+        if (r.layer === 'pocket' && !r.deepInside && idx === 0) drawOneRoseHead(pocketCtx, r, tSec);
+      });
+
+      // Draw crisp upper crown roses onto main canvas BEFORE front glass cover clips them!
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.drawImage(pocketCanvas, 0, 0);
+      ctx.restore();
+
+      // 5) Velvety Progressive Depth Frosted Glass Blur!
+      if (supportsCtxFilter) {
+        blurNearCtx.clearRect(0, 0, blurNear.width, blurNear.height);
+        blurNearCtx.filter = 'blur(6px)';
+        blurNearCtx.drawImage(pocketCanvas, 0, 0, blurNear.width, blurNear.height);
+        blurNearCtx.filter = 'none';
+
+        blurDeepCtx.clearRect(0, 0, blurDeep.width, blurDeep.height);
+        blurDeepCtx.filter = 'blur(13px)';
+        blurDeepCtx.drawImage(blurNear, 0, 0, blurDeep.width, blurDeep.height);
+        blurDeepCtx.filter = 'none';
+      } else {
+        smoothKawasePass(pocketCanvas, blurNear, blurNearCtx, 2);
+        smoothKawasePass(blurNear, blurDeep, blurDeepCtx, 3);
+      }
+
+      const hw = folder.w * 0.5;
+      const hh = folder.h * 0.5;
+      const tl = projectCoverPoint(-hw, -hh, 0);
+      const tr = projectCoverPoint(hw, -hh, 0);
+      const br = projectCoverPoint(hw, hh, 0);
+      const bl = projectCoverPoint(-hw, hh, 0);
+
+      const topY = Math.min(tl.y, tr.y);
+      const botY = Math.max(bl.y, br.y);
+
+      ctx.save();
+      drawRoundedQuadPath(ctx, tl, tr, br, bl, 18 * sf);
+      ctx.clip();
+
+      ctx.fillStyle = currentTheme.glassBase;
+      ctx.fillRect(0, 0, vw, vh);
+
+      ctx.globalAlpha = 0.98;
+      ctx.drawImage(blurDeep, 0, 0, vw, vh);
+      ctx.globalCompositeOperation = 'screen';
+      ctx.globalAlpha = 0.62;
+      ctx.drawImage(blurDeep, 0, 0, vw, vh);
+      ctx.globalCompositeOperation = 'source-over';
+
+      compBlurCtx.clearRect(0, 0, compBlur.width, compBlur.height);
+      compBlurCtx.globalCompositeOperation = 'source-over';
+      compBlurCtx.drawImage(blurNear, 0, 0, compBlur.width, compBlur.height);
+      compBlurCtx.globalCompositeOperation = 'destination-in';
+      const maskTop = (topY / vh) * compBlur.height;
+      const maskMid = ((topY + (botY - topY) * 0.52) / vh) * compBlur.height;
+      const vMask = compBlurCtx.createLinearGradient(0, maskTop, 0, Math.max(maskTop + 8, maskMid));
+      vMask.addColorStop(0.0, 'rgba(255, 255, 255, 0.80)');
+      vMask.addColorStop(0.45, 'rgba(255, 255, 255, 0.32)');
+      vMask.addColorStop(1.0, 'rgba(255, 255, 255, 0.0)');
+      compBlurCtx.fillStyle = vMask;
+      compBlurCtx.fillRect(0, 0, compBlur.width, compBlur.height);
+
+      ctx.globalAlpha = 0.80;
+      ctx.drawImage(compBlur, 0, 0, vw, vh);
+      ctx.globalAlpha = 1.0;
+
+      // Smoky-Amethyst & Opaline / Velvet-Plum Frosted Tint
+      const frostGrad = ctx.createLinearGradient(tl.x, topY, bl.x, botY);
+      frostGrad.addColorStop(0.0, currentTheme.frostTop);
+      frostGrad.addColorStop(0.32, currentTheme.frostMid);
+      frostGrad.addColorStop(1.0, currentTheme.frostBot);
+      ctx.fillStyle = frostGrad;
+      ctx.fillRect(0, 0, vw, vh);
+
+      // Warm Candlelight Pointer Refraction on Frosted Glass
+      const [spR, spG, spB] = currentTheme.spotGlow;
+      const spotR = folder.w * 0.72;
+      const spot = ctx.createRadialGradient(pointer.smoothX, pointer.smoothY, 4, pointer.smoothX, pointer.smoothY, spotR);
+      const spotBoost = folder.isDragNear ? 0.24 : (0.11 + pointer.vortexPower * 0.16);
+      spot.addColorStop(0.0, `rgba(${spR}, ${spG}, ${spB}, ${spotBoost.toFixed(3)})`);
+      spot.addColorStop(0.48, `rgba(196, 158, 226, ${(spotBoost * 0.42).toFixed(3)})`);
+      spot.addColorStop(1.0, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = spot;
+      ctx.fillRect(0, 0, vw, vh);
+
+      if (grainPattern) {
+        ctx.globalAlpha = 0.30;
+        ctx.fillStyle = grainPattern;
+        ctx.fillRect(0, 0, vw, vh);
+        ctx.globalAlpha = 1.0;
+      }
+      ctx.restore();
+
+      // 6) Image 2 Gothic Gold Filigree Inner Frame (when in Crimson Nocturne mode!)
+      drawGothicFiligreeFrame(ctx, tl, tr, br, bl, sf);
+
+      // 7) Image 3 Signature Warm Champagne-Gold Specular Bevel Rim!
+      ctx.save();
+      drawRoundedQuadPath(ctx, tl, tr, br, bl, 18 * sf);
+      const [rsR, rsG, rsB] = currentTheme.rimSoft;
+      const dragGlow = folder.isDragNear ? 0.24 : 0;
+      const rimGrad = ctx.createLinearGradient(tl.x, tl.y, br.x, br.y);
+      rimGrad.addColorStop(0.0, `rgba(255, 246, 226, ${Math.min(1, 0.88 + dragGlow).toFixed(2)})`); // Bright champagne-gold shoulder!
+      rimGrad.addColorStop(0.22, `rgba(${rbR}, ${rbG}, ${rbB}, ${(0.56 + dragGlow).toFixed(2)})`);
+      rimGrad.addColorStop(0.55, `rgba(${rsR}, ${rsG}, ${rsB}, ${(0.28 + dragGlow).toFixed(2)})`);
+      rimGrad.addColorStop(0.84, `rgba(${rbR}, ${rbG}, ${rbB}, ${(0.48 + dragGlow).toFixed(2)})`);
+      rimGrad.addColorStop(1.0, `rgba(255, 244, 220, ${Math.min(1, 0.82 + dragGlow).toFixed(2)})`);
+      ctx.strokeStyle = rimGrad;
+      ctx.lineWidth = 1.45;
+      ctx.stroke();
+
+      // Extra soft candlelit bloom at top-left shoulder & bottom-right corner (Image 3 magic!)
+      ctx.globalCompositeOperation = 'screen';
+      const cornerSpots = [
+        { x: tl.x + 26 * sf, y: tl.y + 4 * sf, r: 54 * sf, a: 0.28 },
+        { x: bl.x + 24 * sf, y: bl.y - 2 * sf, r: 46 * sf, a: 0.22 },
+        { x: br.x - 18 * sf, y: br.y - 4 * sf, r: 48 * sf, a: 0.24 }
+      ];
+      cornerSpots.forEach((cs) => {
+        const cg = ctx.createRadialGradient(cs.x, cs.y, 1, cs.x, cs.y, cs.r);
+        cg.addColorStop(0, `rgba(255, 236, 204, ${cs.a})`);
+        cg.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = cg;
+        ctx.beginPath();
+        ctx.arc(cs.x, cs.y, cs.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
+
+      drawPocketCardsInterior(ctx, true);
+
+      // 8) Foreground Cascading Right-Edge Thorny Vine + Overhanging Roses & Hanging Bud!
+      drawRightCascadingVine(ctx, tSec);
+      roses.forEach((r) => {
+        if (r.layer === 'front') drawThornyStemForRose(ctx, r, tSec);
+      });
+      roses.forEach((r) => {
+        if (r.layer === 'front') drawOneRoseHead(ctx, r, tSec);
+      });
+
+      drawParticlesByDepth(ctx, 1);
+      drawParticlesByDepth(ctx, 0);
+
+      drawDraggableMiniStack(ctx);
+
+      if (pointer.vortexPower > 0.02) {
+        ctx.save();
+        const vp = pointer.vortexPower;
+        const [gR, gG, gB] = currentTheme.goldStroke;
+        for (let r = 0; r < 3; r++) {
+          const rad = (24 + r * 26) * (0.75 + 0.25 * Math.sin(tSec * 6 + r));
+          ctx.strokeStyle = `rgba(${gR}, ${gG}, ${gB}, ${(0.32 * vp * (1 - r * 0.28)).toFixed(3)})`;
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          ctx.arc(pointer.x, pointer.y, rad, tSec * (4 + r), tSec * (4 + r) + Math.PI * 1.35);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      if (pointer.cursorAlpha > 0.01) {
+        ctx.save();
+        ctx.globalAlpha = pointer.cursorAlpha;
+        const cx = pointer.smoothX;
+        const cy = pointer.smoothY;
+        const rs = pointer.ringScale;
+        const [gR, gG, gB] = currentTheme.goldStroke;
+
+        const cGlow = ctx.createRadialGradient(cx, cy, 1, cx, cy, 36);
+        cGlow.addColorStop(0, `rgba(${gR}, ${gG}, ${gB}, 0.24)`);
+        cGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = cGlow;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 36, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = pointer.vortexActive ? `rgba(${gR}, ${gG}, ${gB}, 0.90)` : 'rgba(255, 244, 232, 0.56)';
+        ctx.lineWidth = 1.05;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 10.5 * rs, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = '#FFF8EE';
+        ctx.beginPath();
+        ctx.arc(cx, cy, 2.3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      ctx.restore();
+      requestAnimationFrame(renderFrame);
+    }
+
+    function drawParticlesByDepth(g, targetLayer) {
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        if (p.depthLayer !== targetLayer) continue;
+
+        const lifeRatio = p.age / p.life;
+        const fade = lifeRatio < 0.12 ? (lifeRatio / 0.12) : Math.pow(1 - lifeRatio, 1.35);
+        if (fade <= 0.01) continue;
+
+        const sp = bokehSprites[p.spriteIdx % bokehSprites.length];
+        g.save();
+        g.globalAlpha = fade;
+        g.translate(p.x, p.y);
+
+        if (p.isGoldSpark) {
+          // 4-point Champagne-Gold Cathedral Star Sparkle!
+          const r = p.size * 1.45;
+          g.rotate(p.rot * 0.5);
+          g.fillStyle = 'rgba(255, 240, 202, 0.95)';
+          g.beginPath();
+          g.moveTo(0, -r);
+          g.quadraticCurveTo(r * 0.18, -r * 0.18, r, 0);
+          g.quadraticCurveTo(r * 0.18, r * 0.18, 0, r);
+          g.quadraticCurveTo(-r * 0.18, r * 0.18, -r, 0);
+          g.quadraticCurveTo(-r * 0.18, -r * 0.18, 0, -r);
+          g.closePath();
+          g.fill();
+        } else if (targetLayer === 0) {
+          const d = p.size * 2.2;
+          g.drawImage(sp.soft, -d * 0.5, -d * 0.5, d, d);
+        } else if (targetLayer === 1) {
+          // 3D-fluttering Stained-Glass Rose Petal!
+          g.rotate(p.rot);
+          const flipScale = 0.42 + 0.58 * Math.abs(Math.cos(p.flutterPhase));
+          g.scale(flipScale, 1);
+          const d = p.size * 2.4;
+          g.drawImage(sp.petal, -d * 0.5, -d * 0.5, d, d);
+        } else {
+          const [r, gr, b] = sp.rgb;
+          g.fillStyle = `rgb(${r}, ${gr}, ${b})`;
+          g.beginPath();
+          g.arc(0, 0, p.size, 0, Math.PI * 2);
+          g.fill();
+        }
+        g.restore();
+      }
+    }
+
+    updateLayout();
+    initBackgroundLights();
+    initCollection();
+    window.addEventListener('resize', updateLayout);
+    requestAnimationFrame(renderFrame);
+  })();
+  </script>
+</body>
+</html>
